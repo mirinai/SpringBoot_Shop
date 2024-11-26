@@ -7,35 +7,40 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
-@Entity
-@Table(name = "item")
-@Getter
-@Setter
-@ToString
+
+/**
+ * 상품 정보를 저장하는 엔티티 클래스
+ */
+@Entity // 이 클래스가 JPA 엔티티임을 나타냄
+@Table(name = "item") // 데이터베이스 테이블 이름을 지정
+@Getter // Lombok 어노테이션: getter 메서드 자동 생성
+@Setter // Lombok 어노테이션: setter 메서드 자동 생성
+@ToString // Lombok 어노테이션: toString 메서드 자동 생성
 public class Item {
 
-    @Id
-    @Column(name = "item_id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id; //상품코드
+    @Id // 엔티티의 기본 키를 나타냄
+    @Column(name = "item_id") // 데이터베이스 테이블의 컬럼 이름 지정
+    @GeneratedValue(strategy = GenerationType.AUTO) // 기본 키 값을 자동으로 생성하는 방식 지정
+    private Long id; // 상품 코드 (기본 키)
 
-    @Column(nullable = false, length = 50)
-    private String itemNm; //상품이름
+    @Column(nullable = false, length = 50) // 필수 입력 필드로 최대 길이를 50자로 제한
+    private String itemNm; // 상품 이름
 
-    @Column(name = "price", nullable = false)
-    private int price; //가격
+    @Column(name = "price", nullable = false) // 필수 입력 필드로 지정
+    private int price; // 상품 가격
 
-    @Column(nullable = false)
-    private int stockNumber; //재고수량
+    @Column(nullable = false) // 필수 입력 필드로 지정
+    private int stockNumber; // 상품 재고 수량
 
-    @Lob
-    @Column(nullable = false)
-    private String itemDetail; //상품 상세 설명
+    @Lob // 큰 데이터(텍스트) 타입을 저장하기 위한 설정
+    @Column(nullable = false) // 필수 입력 필드로 지정
+    private String itemDetail; // 상품 상세 설명
 
-    @Enumerated(EnumType.STRING)
-    private ItemSellStatus itemSellStatus; //상품 판매 상태
+    @Enumerated(EnumType.STRING) // 열거형(Enum)을 문자열로 저장
+    private ItemSellStatus itemSellStatus; // 상품 판매 상태 (SELL, SOLD_OUT)
 
     private LocalDateTime regTime; // 등록 시간
-    
+
     private LocalDateTime updateTime; // 수정 시간
 }
+

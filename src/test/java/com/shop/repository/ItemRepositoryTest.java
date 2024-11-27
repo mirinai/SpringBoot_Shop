@@ -149,4 +149,54 @@ class ItemRepositoryTest {
         // 조회된 아이템 수 출력 (디버깅 용도)
         System.out.println("조회된 아이템 수: " + itemList.size());
     }
+
+    @Test
+    @DisplayName("@쿼리를 쓴 상품 조회 테스트")
+    // JUnit 테스트 메서드를 정의합니다. "@쿼리"를 사용하여 상품을 조회하는 테스트임을 표시합니다.
+    public void findByItemDetailTest(){
+        // 테스트용 데이터를 생성합니다. 데이터베이스에 테스트 데이터를 삽입하는 메서드를 호출합니다.
+        this.createItemList();
+        // "테스트 상품 상세 설명"이라는 문자열을 포함한 itemDetail을 가지는 Item 목록을 조회합니다.
+        List<Item> itemList = itemRepository.findByItemDetail("테스트 상품 상세 설명");
+
+        // 조회된 Item 객체들을 순회하면서 각 객체의 정보를 출력합니다.
+//        for(Item item : itemList){
+//            System.out.println(item.toString());
+//        }
+        for (int i = 0; i < itemList.size(); i++) {
+            Item item = itemList.get(i);
+            if(i>0) {
+                System.out.println("----------------------------------");
+            }
+            System.out.println(item.toString());
+            if(i == itemList.size()-1){
+                System.out.println("===================================");
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("nativeQuery 속성을 이용한 상품 조회 리스트")
+    public void findByDetailByNative(){
+
+        StringBuilder output = new StringBuilder();
+
+        this.createItemList();
+        List<Item> itemList = itemRepository.findByItemDetailByNative("테스트 상품 상세 설명");
+        for(int i = 0;i<itemList.size();i++){
+            Item item = itemList.get(i);
+
+            if(i>0){
+                output.append("-----------------------------------------------\n");
+            }
+
+            output.append(item.toString()).append("\n");
+
+            if(i == itemList.size()-1){
+                output.append("=================================================");
+            }
+        } //for
+
+        System.out.println(output.toString());
+    }
 }

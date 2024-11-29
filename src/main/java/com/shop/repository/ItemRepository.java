@@ -3,12 +3,22 @@ package com.shop.repository;
 import com.shop.entity.Item;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+// ItemRepository 인터페이스 정의
+// JpaRepository와 QuerydslPredicateExecutor 인터페이스를 상속받아 데이터 접근 및 Querydsl의 동적 쿼리 기능을 제공
+public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredicateExecutor<Item> {
+    // JpaRepository<Item, Long>
+    // - Spring Data JPA에서 제공하는 기본 CRUD 메서드 및 페이징 기능을 지원
+    // - 제네릭 타입 Item: 엔티티 클래스
+    // - 제네릭 타입 Long: 엔티티의 ID 타입
 
-public interface ItemRepository extends JpaRepository<Item, Long> {
+    // QuerydslPredicateExecutor<Item>
+    // - Querydsl을 활용한 동적 쿼리 생성을 지원
+    // - Predicate를 통해 조건을 정의하여 복잡한 쿼리 작성 가능
 
     List<Item> findByItemNm(String itemNm);
 

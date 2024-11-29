@@ -1,12 +1,22 @@
 package com.shop.repository;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shop.constant.ItemSellStatus;
 import com.shop.entity.Item;
+import com.shop.entity.QItem;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
+import org.thymeleaf.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +31,15 @@ class ItemRepositoryTest {
 
     @Autowired
     ItemRepository itemRepository; // 테스트할 ItemRepository 주입
-    
+
+    @PersistenceContext
+    // JPA에서 EntityManager를 주입받기 위해 사용되는 어노테이션
+            //JPA의 영속성 컨텍스트(Persistence Context)에 속한 EntityManager를 관리합니다.
+    EntityManager entityManager; // JPA의 핵심 인터페이스로 데이터베이스 작업을 관리하는 객체
+    // JPA의 핵심 인터페이스로, 데이터베이스의 CRUD 작업을 수행합니다.
+    // 엔티티 관리: 엔티티를 영속성 컨텍스트에 저장, 수정, 삭제.
+    // PQL 실행: JPA 쿼리 언어(JPQL)를 실행.
+    // 트랜잭션 관리: 데이터 작업의 트랜잭션을 처리.
     @Test
     @DisplayName("상품 저장 테스트")
     public void createItemTest(){
@@ -199,4 +217,116 @@ class ItemRepositoryTest {
 
         System.out.println(output.toString());
     }
+
+    @Test
+    @DisplayName("Querydsl 조회 테스트1") // 테스트 케이스의 이름을 지정하여 테스트 목적을 명시
+    public void queryDslTest() {
+        this.createItemList(); // 테스트를 위한 아이템 리스트를 생성
+
+        // Querydsl을 사용하기 위한 JPAQueryFactory 객체 생성, entityManager를 주입
+        JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+        QItem qItem = QItem.item; // Querydsl에서 생성된 QItem 객체를 통해 엔티티 필드에 접근
+
+        // Querydsl 쿼리 작성: QItem 엔티티로부터 데이터를 조회
+        JPAQuery<Item> query = queryFactory.selectFrom(qItem)
+                .where(qItem.itemSellStatus.eq(ItemSellStatus.SELL)) // 판매 상태가 SELL인 조건 추가
+                .where(qItem.itemDetail.like("%" + "테스트 상품 상세 설명" + "%")) // 상세 설명에 특정 텍스트가 포함된 조건 추가
+                .orderBy(qItem.price.desc()); // 가격을 내림차순으로 정렬
+
+        // 작성한 쿼리를 실행하고 결과를 리스트로 반환
+        List<Item> itemList = query.fetch();
+
+        // 조회된 아이템 리스트를 반복문으로 출력
+        for (int i = 0; i < itemList.size(); i++) {
+            if (i == 0) { // 리스트의 첫 번째 아이템일 경우
+                System.out.println("==================================");
+                System.out.println(itemList.get(i).toString());
+                System.out.println("-----------------------------------");
+            } else if (i > 0 && i < itemList.size() - 1) { // 리스트의 중간에 위치한 아이템일 경우
+                System.out.println(itemList.get(i).toString());
+                System.out.println("-----------------------------------");
+            } else { // 리스트의 마지막 아이템일 경우
+                System.out.println(itemList.get(i).toString());
+                System.out.println("==================================");
+            }
+        }
+    }
+
+    public void createItemList2(){
+        for(int i = 1;i<=5;i++){
+            Item item = new Item();
+            item.setItemNm("테스트 상품"+i);
+            item.setPrice(10000+i);
+            item.setItemDetail("테스트 상품 상세 설명"+i);
+            item.setItemSellStatus(ItemSellStatus.SELL);
+            item.setStockNumber(100);
+            item.setRegTime(LocalDateTime.now());
+            item.setUpdateTime(LocalDateTime.now());
+            itemRepository.save(item);
+        }
+
+        for(int i = 6;i<=10;i++){
+            Item item = new Item();
+            item.setItemNm("테스트 상품"+i);
+            item.setPrice(10000+i);
+            item.setItemDetail("테스트 상품 상세 설명"+i);
+            item.setItemSellStatus(ItemSellStatus.SOLD_OUT);
+            item.setStockNumber(0);
+            item.setRegTime(LocalDateTime.now());
+            item.setUpdateTime(LocalDateTime.now());
+            itemRepository.save(item);
+        }
+    }
+
+    @Test
+    @DisplayName("상품 Querydsl 조회테스트2")
+    public void queryDslTest2(){
+        this.createItemList2();
+
+        // BooleanBuilder 객체 생성: Querydsl에서 동적 쿼리를 작성하기 위한 조건들을 담는 객체
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+
+        // Querydsl의 QItem 객체를 통해 Item 엔티티의 필드에 접근
+        QItem item = QItem.item;
+        // 검색 조건 초기화
+        String itemDetail = "테스트 상품 상세 설명"; // 상세 설명에 포함될 텍스트
+        int price = 10003; // 최소 가격 조건
+        String itemSellStat = "SELL"; // 판매 상태 조건
+        // 조건 추가: 상세 설명에 특정 텍스트가 포함된 아이템
+        booleanBuilder.and((item.itemDetail.like("%"+itemDetail+"%")));
+        // 조건 추가: 가격이 특정 값보다 큰 아이템
+        booleanBuilder.and(item.price.gt(price));
+        // 조건 추가: 판매 상태가 SELL인 경우만 추가
+        if(StringUtils.equals(itemSellStat, ItemSellStatus.SELL)){
+            booleanBuilder.and(item.itemSellStatus.eq(ItemSellStatus.SELL));
+        }
+        // 페이징 설정: 첫 번째 페이지(0부터 시작), 페이지당 5개 아이템
+        Pageable pageable = PageRequest.of(0,5);
+
+        // BooleanBuilder와 Pageable을 사용해 Querydsl로 데이터를 조회
+        Page<Item> itemPagingResult = itemRepository.findAll(booleanBuilder,pageable);// querydsl에서 가져옴
+
+        // 총 검색된 아이템 개수 출력
+        System.out.println("total elements : "+itemPagingResult.getTotalElements());
+
+        // 현재 페이지의 아이템 목록을 가져옴
+        List<Item> resultItemList = itemPagingResult.getContent();
+
+        // 아이템 리스트 출력
+        for(int i = 0;i <resultItemList.size();i++){
+            if (i == 0) { // 리스트의 첫 번째 아이템일 경우
+                System.out.println("==================================");
+                System.out.println(resultItemList.get(i).toString());
+                System.out.println("-----------------------------------");
+            } else if (i > 0 && i < resultItemList.size() - 1) { // 리스트의 중간에 위치한 아이템일 경우
+                System.out.println(resultItemList.get(i).toString());
+                System.out.println("-----------------------------------");
+            } else { // 리스트의 마지막 아이템일 경우
+                System.out.println(resultItemList.get(i).toString());
+                System.out.println("==================================");
+            }
+        }
+
+    }
+
 }

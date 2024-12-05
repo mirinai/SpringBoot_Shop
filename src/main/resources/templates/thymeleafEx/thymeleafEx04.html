@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>상품 리스트 출력 예제</h1>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <td>순번</td> <!-- 순번 열 -->
+                <td>상품명</td> <!-- 상품명 열 -->
+                <td>상품설명</td> <!-- 상품설명 열 -->
+                <td>가격</td> <!-- 가격 열 -->
+                <td>상품등록일</td> <!-- 상품등록일 열 -->
+            </tr>
+        </thead>
+        <tbody>
+            <!-- itemDtoList의 데이터를 반복하여 출력 -->
+            <tr th:each="itemDto, status: ${itemDtoList}">
+                <!-- 짝수 행이면 "짝수"를 출력 -->
+                <td th:if="${status.even}" th:text="짝수"></td>
+                <!-- 홀수 행이면 "홀수"를 출력 -->
+                <td th:unless="${status.even}" th:text="홀수"></td>
+
+                <td th:text="${itemDto.itemNm}"></td>
+                <td th:text="${itemDto.itemDetail}"></td>
+                <td th:text="${itemDto.price}"></td>
+                <td th:text="${itemDto.regTime}"></td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr>
+                <td>순번</td> <!-- 순번 열 -->
+                <td>상품명</td> <!-- 상품명 열 -->
+                <td>상품설명</td> <!-- 상품설명 열 -->
+                <td>가격</td> <!-- 가격 열 -->
+                <td>상품등록일</td> <!-- 상품등록일 열 -->
+            </tr>
+        </tbody>
+        <tbody>
+            <tr th:each="itemDto, status: ${itemDtoList}">
+                <!-- 반복 상태(status.even)에 따라 짝수/홀수를 출력 -->
+                <td th:switch="${status.even}">
+                    <!-- status.even이 true일 경우 "짝수" 출력 -->
+                    <span th:case=true>짝수</span>
+                    <!-- status.even이 false일 경우 "홀수" 출력 -->
+                    <span th:case=false>홀수</span>
+                </td>
+                <td th:text="${itemDto.itemNm}"></td>
+                <td th:text="${itemDto.itemDetail}"></td>
+                <td th:text="${itemDto.price}"></td>
+                <td th:text="${itemDto.regTime}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

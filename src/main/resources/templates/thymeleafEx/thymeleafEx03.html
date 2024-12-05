@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- 페이지 제목 -->
+<h1>상품 리스트 출력 예제</h1>
+
+<!-- 상품 정보를 출력할 테이블 -->
+<table border="1">
+  <!-- 테이블 헤더 -->
+  <thead>
+  <tr>
+    <td>순번</td> <!-- 순번 열 -->
+    <td>상품명</td> <!-- 상품명 열 -->
+    <td>상품설명</td> <!-- 상품설명 열 -->
+    <td>가격</td> <!-- 가격 열 -->
+    <td>상품등록일</td> <!-- 상품등록일 열 -->
+  </tr>
+  </thead>
+  <!-- 테이블 바디 -->
+  <tbody>
+  <!-- itemDtoList의 각 항목을 순차적으로 출력 -->
+  <!-- th:each: itemDtoList에서 각 항목을 반복하며, 현재 상태를 status 변수로 참조 -->
+  <tr th:each="itemDto, status: ${itemDtoList}">
+    <!-- 현재 반복 중인 순번 (0부터 시작, status.index 사용) -->
+    <td th:text="${status.index}"></td>
+    <!-- 현재 항목의 상품명 출력 -->
+    <td th:text="${itemDto.itemNm}"></td>
+    <!-- 현재 항목의 상품 설명 출력 -->
+    <td th:text="${itemDto.itemDetail}"></td>
+    <!-- 현재 항목의 상품 가격 출력 -->
+    <td th:text="${itemDto.price}"></td>
+    <!-- 현재 항목의 등록 시간 출력 -->
+    <td th:text="${itemDto.regTime}"></td>
+  </tr>
+  </tbody>
+</table>
+</body>
+
+</html>

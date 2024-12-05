@@ -292,6 +292,7 @@ class ItemRepositoryTest {
         String itemDetail = "테스트 상품 상세 설명"; // 상세 설명에 포함될 텍스트
         int price = 10003; // 최소 가격 조건
         String itemSellStat = "SELL"; // 판매 상태 조건
+
         // 조건 추가: 상세 설명에 특정 텍스트가 포함된 아이템
         booleanBuilder.and((item.itemDetail.like("%"+itemDetail+"%")));
         // 조건 추가: 가격이 특정 값보다 큰 아이템
@@ -300,6 +301,7 @@ class ItemRepositoryTest {
         if(StringUtils.equals(itemSellStat, ItemSellStatus.SELL)){
             booleanBuilder.and(item.itemSellStatus.eq(ItemSellStatus.SELL));
         }
+
         // 페이징 설정: 첫 번째 페이지(0부터 시작), 페이지당 5개 아이템
         Pageable pageable = PageRequest.of(0,5);
 

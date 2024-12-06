@@ -121,4 +121,9 @@ public class ThymeleafExController {
         // "thymeleafEx/thymeleafEx06.html" 템플릿을 렌더링하여 응답으로 반환
         return "thymeleafEx/thymeleafEx06";
     }
+
+    @GetMapping(value = "/ex07")
+    public String thymeleafExample07(){
+        return "thymeleafEx/thymeleafEx07";
+    }
 }

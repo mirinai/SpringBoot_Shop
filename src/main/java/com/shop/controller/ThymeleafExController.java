@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = "/thymeleaf")
+@RequestMapping(value = "/thymeleaf") // 모든 핸들러 메서드의 기본 경로를 "/thymeleaf"로 설정
 public class ThymeleafExController {
 
     @GetMapping(value = "/ex01")
@@ -104,5 +104,21 @@ public class ThymeleafExController {
         return "thymeleafEx/thymeleafEx04";
     }
 
+    // "/thymeleaf/ex05" URL에 대한 GET 요청을 처리하는 메서드
+    @GetMapping(value = "/ex05")
+    public String thymeleafExample05(){
+        // "thymeleafEx/thymeleafEx05.html" 템플릿을 렌더링하여 응답으로 반환
+        return "thymeleafEx/thymeleafEx05";
+    }
 
+    // "/thymeleaf/ex06" URL에 대한 GET 요청을 처리하는 메서드
+    @GetMapping(value = "/ex06")
+    public String thymeleafExample06(String param1, String param2, Model model){ //IDE가 알아서 RequestParam이 없어도 맞으면 넣어줌
+        // 요청으로부터 전달된 파라미터 "param1"과 "param2"를 모델에 추가
+        model.addAttribute("param1", param1);
+        model.addAttribute("param2",param2);
+
+        // "thymeleafEx/thymeleafEx06.html" 템플릿을 렌더링하여 응답으로 반환
+        return "thymeleafEx/thymeleafEx06";
+    }
 }

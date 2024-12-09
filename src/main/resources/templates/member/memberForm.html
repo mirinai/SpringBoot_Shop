@@ -33,7 +33,7 @@
 <!-- 메인 콘텐츠 영역 -->
 <div layout:fragment="content" class="content">
     <!-- 📘 이 영역은 'content'라는 이름의 프래그먼트로 정의된 콘텐츠 -->
-    <form action="/member/new" role="form" method="post"
+    <form action="/members/new" role="form" method="post"
           th:object="${memberFormDto}">
         <!-- 📘 폼 시작 태그
             - action="/member/new": 폼 데이터를 "/member/new"로 전송
@@ -81,7 +81,18 @@
             <button type="submit" class="btn btn-primary" style="">Submit</button>
         </div>
         <input type="hidden" th:name="${_csrf.parameterName}"
-        th:value="${_csrf.token}">
+               th:value="${_csrf.token}" />
+        <!--
+        📘 CSRF(Cross-Site Request Forgery) 방지를 위한 Hidden Input 필드
+        - Spring Security가 활성화된 상태에서는 POST, PUT, DELETE 등 데이터 변경 요청 시
+          CSRF 토큰이 반드시 포함되어야 함.
+        - th:name="${_csrf.parameterName}":
+          - CSRF 토큰의 파라미터 이름을 동적으로 설정. 일반적으로 "_csrf".
+        - th:value="${_csrf.token}":
+          - CSRF 토큰 값을 동적으로 설정. 서버가 생성한 CSRF 토큰 값.
+        - 이 필드를 통해 서버가 요청의 정당성을 확인할 수 있음.
+        -->
+
     </form>
 </div>
 

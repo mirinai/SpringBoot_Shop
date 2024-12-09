@@ -3,10 +3,12 @@ package com.shop.controller;
 import com.shop.dto.MemberFormDto;
 import com.shop.entity.Member;
 import com.shop.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,22 +39,48 @@ public class MemberController {
         return "member/memberForm"; // 회원 가입 폼 화면
     }
 
-    @PostMapping(value = "/new")
-// 📘 HTTP POST 요청을 처리하는 메서드로, /member/new 경로로 들어오는 POST 요청을 처리
+//    @PostMapping(value = "/new")
+//// 📘 HTTP POST 요청을 처리하는 메서드로, /member/new 경로로 들어오는 POST 요청을 처리
+//
+//    public String memberForm(MemberFormDto memberFormDto) {
+//        // 📘 클라이언트가 전송한 회원가입 폼 데이터를 MemberFormDto 객체로 자동 바인딩
+//
+//        Member member = Member.createMember(memberFormDto, passwordEncoder);
+//        // 📘 MemberFormDto의 데이터를 기반으로 Member 엔티티 생성
+//        // 📘 비밀번호는 PasswordEncoder를 통해 암호화하여 Member 엔티티에 설정
+//
+//        memberService.saveMember(member);
+//        // 📘 MemberService의 saveMember() 메서드를 호출하여 Member 엔티티를 데이터베이스에 저장
+//
+//        return "redirect:/";
+//        // 📘 회원가입이 완료되면 루트 경로("/")로 리다이렉트하여 메인 페이지로 이동
+//    }
 
-    public String memberForm(MemberFormDto memberFormDto) {
-        // 📘 클라이언트가 전송한 회원가입 폼 데이터를 MemberFormDto 객체로 자동 바인딩
+@PostMapping(value = "/new")
+// 📘 HTTP POST 요청을 처리하는 메서드로, /members/new 경로로 들어오는 요청 처리
+public String newMember(@Valid MemberFormDto memberFormDto, BindingResult bindingResult, Model model) {
 
-        Member member = Member.createMember(memberFormDto, passwordEncoder);
-        // 📘 MemberFormDto의 데이터를 기반으로 Member 엔티티 생성
-        // 📘 비밀번호는 PasswordEncoder를 통해 암호화하여 Member 엔티티에 설정
+        // 📘 유효성 검증에서 에러가 발생하면 다시 회원가입 폼 페이지로 돌아감
+        if (bindingResult.hasErrors()) {
+            return "member/memberForm"; // 📘 memberForm.html 뷰 반환
+        }
 
-        memberService.saveMember(member);
-        // 📘 MemberService의 saveMember() 메서드를 호출하여 Member 엔티티를 데이터베이스에 저장
+        try {
+            // 📘 입력받은 회원 정보를 기반으로 Member 엔티티 생성
+            Member member = Member.createMember(memberFormDto, passwordEncoder);
+            // 📘 생성한 Member 엔티티를 데이터베이스에 저장
+            memberService.saveMember(member);
 
-        return "redirect:/";
-        // 📘 회원가입이 완료되면 루트 경로("/")로 리다이렉트하여 메인 페이지로 이동
+        } catch (IllegalStateException e) {
+            // 📘 회원 저장 중 예외 발생 시 에러 메시지를 모델에 추가하고 폼 페이지로 반환
+            model.addAttribute("errorMessage", e.getMessage());
+            return "member/memberForm"; // 📘 에러 메시지를 포함한 폼 뷰 반환
+        }
+
+        // 📘 회원가입 성공 시 메인 페이지로 리다이렉트
+        return "redirect:/"; // 📘 루트 경로("/")로 리다이렉트
     }
+
 
 }
 

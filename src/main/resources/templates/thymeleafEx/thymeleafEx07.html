@@ -2,8 +2,22 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
                 xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
                 layout:decorate="~{layouts/layout1}">
+    <!--
+    layout:decorate="~{layouts/layout1}"
+    📘 이 부분은 "이 HTML 파일이 layouts/layout1.html을 레이아웃 템플릿으로 사용하겠다"는 선언입니다.
+    📘 "~{layouts/layout1}"는 Thymeleaf의 경로 지정 방식으로,
+        src/main/resources/templates/layouts/layout1.html 파일을 참조합니다.
+    📘 이 선언에 따라 layout1.html 파일의 content 부분에 이 파일의 콘텐츠가 삽입됩니다.
+
+    layout1.html 파일을 이 페이지의 부모 레이아웃으로 사용합니다.
+    부모 파일의 구조(헤더, 푸터, 공통 레이아웃)가 이 페이지에 적용됩니다.
+    -->
     <!-- 본문 콘텐츠 프래그먼트 정의 -->
     <div layout:fragment="content">
         본문영역
     </div>
+    <!--
+    layout1.html의 layout:fragment="content" 부분에 삽입될 콘텐츠를 정의합니다.
+    이곳에 작성한 **본문 콘텐츠(본문영역)**가 부모 레이아웃의 콘텐츠 영역에 채워집니다.
+    -->
 </html>

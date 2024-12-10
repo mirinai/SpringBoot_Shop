@@ -56,9 +56,9 @@ public class MemberController {
 //        // 📘 회원가입이 완료되면 루트 경로("/")로 리다이렉트하여 메인 페이지로 이동
 //    }
 
-@PostMapping(value = "/new")
-// 📘 HTTP POST 요청을 처리하는 메서드로, /members/new 경로로 들어오는 요청 처리
-public String newMember(@Valid MemberFormDto memberFormDto, BindingResult bindingResult, Model model) {
+    @PostMapping(value = "/new")
+    // 📘 HTTP POST 요청을 처리하는 메서드로, /members/new 경로로 들어오는 요청 처리
+    public String newMember(@Valid MemberFormDto memberFormDto, BindingResult bindingResult, Model model) {
 
         // 📘 유효성 검증에서 에러가 발생하면 다시 회원가입 폼 페이지로 돌아감
         if (bindingResult.hasErrors()) {
@@ -81,6 +81,17 @@ public String newMember(@Valid MemberFormDto memberFormDto, BindingResult bindin
         return "redirect:/"; // 📘 루트 경로("/")로 리다이렉트
     }
 
+    @GetMapping(value = "/login")
+    public String loginMember(){
+        return "/member/memberLoginForm";
+    }
+
+    @GetMapping(value = "/login/error")
+    public String loginError(Model model){
+        model.addAttribute("loginErrorMsg", "아이디 또는 비밀번호를 확인해주세요");
+
+        return "/member/memberLoginForm";
+    }
 
 }
 

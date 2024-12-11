@@ -56,7 +56,10 @@ public class Member {
         member.setPassword(password);
 
         // 📘 회원의 기본 역할을 ROLE.USER로 설정
-        member.setRole(Role.USER);
+//        member.setRole(Role.USER);
+
+        // 📘 회원의 기본 역할을 ROLE.ADMIN로 설정
+        member.setRole(Role.ADMIN);
 
         return member;// 생성된 Member 객체 반환
     }

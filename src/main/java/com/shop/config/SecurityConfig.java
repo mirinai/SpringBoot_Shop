@@ -8,7 +8,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -56,11 +58,38 @@ public class SecurityConfig {
                        .defaultSuccessUrl("/") // 📘 로그인 성공 후 이동할 URL
                        .usernameParameter("email") // 📘 로그인 폼의 username 입력 필드를 email로 지정
                        .failureUrl("/members/login/error") // 📘 로그인 실패 시 이동할 URL
+                       .permitAll() // 📘 로그인 관련 URL에 대해 모든 사용자에게 접근 허용
                )
                .logout(logout -> logout
                        .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout")) // 📘 로그아웃 URL
                        .logoutSuccessUrl("/") // 📘 로그아웃 성공 후 이동할 URL
-               );
+                       .permitAll() // 📘 로그아웃 관련 URL에 대해 모든 사용자에게 접근 허용
+               )
+               .authorizeHttpRequests(auth -> auth
+                       .requestMatchers("/", "/members/**","/item/**","/images/**").permitAll()// 📘 모든 사용자가 접근 가능
+                       .requestMatchers("/admin/**").hasRole("ADMIN")// 📘 ADMIN Role만 접근 가능
+                       .anyRequest().authenticated() // 📘 나머지 모든 요청은 인증을 요구
+               )
+               .exceptionHandling(exceptionHandling ->
+                       exceptionHandling.authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+
+               ) // 📘 인증되지 않은 사용자에 대한 예외 처리
+       ;
+
+//       http.authorizeRequests() //시큐리티 처리에 HttpServletRequest를 이용한다는 것을 뜻함
+//               .mvcMatchers("/", "/members/**", "/item/**", "/images/**").permitAll() // permitAll()을 통해 모든 유저가 인증(로그인) 없이 해당 경로에 접근 할 수 있도록
+//               .mvcMatchers("/admin/**").hasRole("ADMIN") // /ADMIN으로 시작하는 경로는 해당 계정이 ADMIN Role일 경우에만 접근 하도록
+//               .anyRequest().authenticated() //나머지 경로들은 모두 인증을 요구하도록 함
+//       ;// 옛날코드
+//       http.exceptionHandling()
+//               .authenticationEntryPoint
+//                       (new CustomAuthenticationEntryPoint()) // 인증되지 않은 유저가 리소스에 접근하였을 때 수행되는 핸들러를 등록
+//       ;//옛날코드
+//
+//        @Override
+//        public void configure(WebSecurity web) throws Exception{
+//            web.ignoring().antMatchers("/css/**", "/js/**","/img/**"); // static 디렉터리의 하위 파일은 인증 무시하기
+//        }  // 옛날 코드
 
         return http.build();
     }
@@ -92,5 +121,15 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    /**
+     * 📘 정적 리소스에 대한 접근 허용 설정
+     * - static 디렉터리의 하위 파일(css, js, img 등)은 보안 필터를 무시하도록 설정합니다.
+     * - WebSecurityCustomizer를 통해 필터링되지 않도록 설정합니다.
+     */
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer(){
+        return (web) -> web.ignoring().requestMatchers("/css/**", "/js/**", "/img/**");
     }
 }

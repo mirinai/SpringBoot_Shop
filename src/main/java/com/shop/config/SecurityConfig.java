@@ -50,7 +50,7 @@ public class SecurityConfig {
 //                                .permitAll()
 //                );
        http
-               .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
+//               .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
                .formLogin(formLogin -> formLogin
                        .loginPage("/members/login") // 📘 사용자 정의 로그인 페이지
                        .defaultSuccessUrl("/") // 📘 로그인 성공 후 이동할 URL

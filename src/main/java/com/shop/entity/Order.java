@@ -19,7 +19,7 @@ public class Order {
     @Column(name = "order_id") // 테이블의 컬럼 이름을 "order_id"로 매핑합니다.
     private Long id; // 주문의 고유 식별자(ID)입니다.
 
-    @ManyToOne // Order와 Member 사이의 다대일(N:1) 관계를 설정합니다. 여러 주문이 하나의 회원에 매핑될 수 있습니다.
+    @ManyToOne(fetch = FetchType.LAZY) // Order와 Member 사이의 다대일(N:1) 관계를 설정합니다. 여러 주문이 하나의 회원에 매핑될 수 있습니다.
     @JoinColumn(name = "member_id") // 외래 키(Foreign Key)로 "member_id" 컬럼에 매핑합니다.
     private Member member; // 주문과 연결된 회원(Member) 객체를 나타냅니다.
 

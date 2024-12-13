@@ -16,7 +16,7 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.AUTO) // 자동으로 값 생성 전략 지정 (GenerationType.AUTO - 데이터베이스 설정에 따라 자동 생성)
     private Long id;
 
-    @OneToOne // 회원과 카트는 일대일 관계임을 명시
+    @OneToOne(fetch = FetchType.LAZY) // 회원과 카트는 일대일 관계임을 명시
     @JoinColumn(name = "member_id") // 외래 키 매핑 - member 테이블의 member_id 컬럼과 연결
     private Member member; // 회원 엔티티 클래스 타입의 필드 (회원과 연관된 카트)
 }

@@ -15,11 +15,19 @@ public class OrderItem {
     @Column(name = "order_item_id") // 테이블의 컬럼 이름을 "order_item_id"로 매핑합니다.
     private Long id; // 주문 항목의 고유 식별자(ID)입니다.
 
-    @ManyToOne // OrderItem과 Item 사이의 다대일(N:1) 관계를 설정합니다. 여러 개의 OrderItem이 하나의 Item에 매핑될 수 있습니다.
+    @ManyToOne(fetch = FetchType.LAZY)
+    // OrderItem과 Item 사이의 다대일(N:1) 관계를 설정합니다. 여러 개의 OrderItem이 하나의 Item에 매핑될 수 있습니다.
+    // **fetch = FetchType.LAZY**: 지연 로딩 전략을 적용하여,
+    // OrderItem을 조회할 때 Item은 로드되지 않고, **필요할 때만 조회**됩니다.
+    // 실제로 **item.getXXX() 메서드를 호출할 때 프록시가 초기화**되어 **데이터베이스에서 조회**가 일어납니다.
     @JoinColumn(name = "item_id") // 외래 키(Foreign Key)로 "item_id" 컬럼에 매핑합니다.
     private Item item; // 주문 항목에 연결된 상품(Item) 객체를 나타냅니다.
 
-    @ManyToOne // OrderItem과 Order 사이의 다대일(N:1) 관계를 설정합니다. 여러 개의 OrderItem이 하나의 Order에 매핑될 수 있습니다.
+    @ManyToOne(fetch = FetchType.LAZY)
+    // OrderItem과 Order 사이의 다대일(N:1) 관계를 설정합니다. 여러 개의 OrderItem이 하나의 Order에 매핑될 수 있습니다.
+    // **fetch = FetchType.LAZY**: 지연 로딩 전략을 적용하여,
+    // OrderItem을 조회할 때 Order는 로드되지 않고, **필요할 때만 조회**됩니다.
+    // **order.getXXX() 메서드를 호출할 때 프록시가 초기화**되어 **데이터베이스에서 조회**가 일어납니다.
     @JoinColumn(name = "order_id") // 외래 키(Foreign Key)로 "order_id" 컬럼에 매핑합니다.
     // **order_id 외래 키(Foreign Key)**로 매핑합니다.
     // Order 테이블의 기본 키(PK)를 OrderItem 테이블의 order_id 컬럼에 외래 키로 저장합니다.

@@ -14,11 +14,11 @@ public class CartItem {
     @Column(name = "cart_item_id") // 테이블의 컬럼 이름을 "cart_item_id"로 매핑합니다.
     private Long id; // 장바구니 아이템의 고유 식별자(ID)입니다.
 
-    @ManyToOne // Cart와의 다대일(N:1) 관계를 설정합니다. 여러 CartItem이 하나의 Cart에 매핑될 수 있습니다.
+    @ManyToOne(fetch = FetchType.LAZY) // Cart와의 다대일(N:1) 관계를 설정합니다. 여러 CartItem이 하나의 Cart에 매핑될 수 있습니다.
     @JoinColumn(name = "cart_id") // 외래 키(Foreign Key)로 "cart_id" 컬럼에 매핑합니다.
     private Cart cart; // 장바구니(Cart)와의 연관 관계를 나타내는 필드입니다.
 
-    @ManyToOne // Item과의 다대일(N:1) 관계를 설정합니다. 여러 CartItem이 하나의 Item에 매핑될 수 있습니다.
+    @ManyToOne(fetch = FetchType.LAZY) // Item과의 다대일(N:1) 관계를 설정합니다. 여러 CartItem이 하나의 Item에 매핑될 수 있습니다.
     @JoinColumn(name = "item_id") // 외래 키(Foreign Key)로 "item_id" 컬럼에 매핑합니다.
     private Item item; // 장바구니 항목에 연결된 상품(Item)입니다. 하나의 Item에 여러 CartItem이 연결될 수 있습니다.
 

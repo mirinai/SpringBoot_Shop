@@ -3,6 +3,7 @@ package com.shop.entity;
 import com.shop.constant.ItemSellStatus;
 import com.shop.repository.ItemRepository;
 import com.shop.repository.MemberRepository;
+import com.shop.repository.OrderItemRepository;
 import com.shop.repository.OrderRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -158,5 +159,45 @@ class OrderTest {
         // Order와 OrderItem의 변경 사항을 데이터베이스에 반영
         // **orphanRemoval = true**에 의해 OrderItem이 고아 객체로 인식되어
         // **DELETE 쿼리가 자동 실행**됩니다.
+    }
+
+    @Autowired
+    OrderItemRepository orderItemRepository; // OrderItem 엔티티에 대한 CRUD 작업을 수행하는 Repository
+
+    /**
+     * **지연 로딩(Lazy Loading) 테스트 메서드**
+     * - Order와 OrderItem의 관계에서 **Lazy Loading**의 동작을 확인합니다.
+     * - OrderItem을 조회했을 때 **Order가 프록시 객체로 로드되는지 확인**합니다.
+     */
+    @Test
+    @DisplayName("지연 로딩 테스트")
+    public void lazyLoadingTest(){
+
+        // 1️⃣ 새로운 Order(주문) 생성 (3개의 OrderItem이 포함됨)
+        Order order = this.createOrder(); // 3개의 OrderItem이 포함된 Order를 생성하고 저장
+
+        // 2️⃣ 첫 번째 OrderItem의 ID를 가져옴 (지연 로딩을 확인할 대상)
+        Long orderItemId = order.getOrderItems().get(0).getId();
+        // 생성된 Order의 orderItems 리스트에서 첫 번째 OrderItem의 ID를 가져옵니다.
+
+        // 3️⃣ 영속성 컨텍스트 초기화
+        entityManager.flush(); // 영속성 컨텍스트의 변경 사항을 DB에 반영합니다.
+        entityManager.clear(); // **1차 캐시 초기화** (영속성 컨텍스트에 저장된 엔티티가 모두 분리됨)
+        // 이를 통해 이후의 조회 작업이 1차 캐시가 아닌 **데이터베이스로부터 데이터를 다시 로드**하도록 만듭니다.
+
+        // 4️⃣ OrderItem 조회 (OrderItem만 로드됨, Order는 지연 로딩)
+        OrderItem orderItem = orderItemRepository.findById(orderItemId)
+                .orElseThrow(EntityNotFoundException::new);
+        // **OrderItem만 조회**합니다.
+        // OrderItem과 연관된 Order는 **Lazy Loading**으로 설정되어 있으므로, **Order 객체는 로드되지 않고 프록시로 유지**됩니다.
+
+        // 5️⃣ OrderItem의 연관된 Order의 클래스 정보 출력
+        System.out.println("Order class : " + orderItem.getOrder().getClass());
+        // **orderItem.getOrder()**는 Lazy Loading으로 인해 **프록시 객체(HibernateProxy)로 로드**됩니다.
+        // 프록시 객체의 실제 클래스 이름이 출력되며, Hibernate에서는 **Order$$EnhancerByHibernate...**와 같은 이름으로 표시됩니다.
+
+        System.out.println("=================================================================");
+        orderItem.getOrder().getOrderDate();
+        System.out.println("=================================================================");
     }
 }

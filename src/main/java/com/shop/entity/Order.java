@@ -28,8 +28,16 @@ public class Order {
     @Enumerated(EnumType.STRING) // Enum을 데이터베이스에 **문자열(String)**로 저장합니다.
     private OrderStatus orderStatus; // 주문 상태를 나타내는 열거형 필드로, 예를 들어 "ORDER", "CANCEL"과 같은 상태 값이 들어갑니다.
 
-    @OneToMany(mappedBy = "order")  // Order와 OrderItem의 **일대다(1:N) 관계**를 설정합니다.
-    private List<OrderItem> orderItems = new ArrayList<>(); // 하나의 주문에 여러 개의 주문 항목(OrderItem)이 포함될 수 있습니다.
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    // Order와 OrderItem 간의 **1:N(일대다) 관계**를 설정합니다.
+    // OrderItem의 `order` 필드에 의해 매핑되며, **Order는 연관 관계의 주인이 아닙니다.**
+    // **cascade = CascadeType.ALL** : Order(부모 엔티티)의 상태 변화(PERSIST, MERGE, REMOVE 등)가
+    // **연관된 OrderItem(자식 엔티티)에게 모두 전이**됩니다.
+    // **orphanRemoval = true** : Order의 orderItems 컬렉션에서 OrderItem을 제거하면
+    // **고아 객체가 되어 자동으로 DELETE 쿼리가 실행**됩니다.
+    private List<OrderItem> orderItems = new ArrayList<>();
+    // **하나의 주문(Order)에는 여러 개의 주문 항목(OrderItem)이 포함**될 수 있습니다.
+
 
     private LocalDateTime regTime; // 주문이 처음 생성된 날짜 및 시간을 저장하는 필드입니다.
 

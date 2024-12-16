@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity // JPA의 엔티티(Entity)임을 명시하며, 이 클래스는 데이터베이스 테이블과 매핑됩니다.
 @Getter @Setter
-public class OrderItem {
+public class OrderItem extends BaseEntity{
 
     @Id // 이 필드가 테이블의 기본 키(Primary Key)임을 명시합니다.
     @GeneratedValue // 기본 키 값을 자동으로 생성(자동 증가)합니다.
@@ -37,7 +37,7 @@ public class OrderItem {
 
     private int count; // 주문한 상품의 수량을 나타내는 필드입니다.
 
-    private LocalDateTime regTime; // 주문 항목이 생성된 날짜 및 시간을 저장하는 필드입니다.
-
-    private LocalDateTime updateTime; // 주문 항목 정보가 마지막으로 수정된 날짜 및 시간을 저장하는 필드입니다.
+//    private LocalDateTime regTime; // 주문 항목이 생성된 날짜 및 시간을 저장하는 필드입니다.
+//
+//    private LocalDateTime updateTime; // 주문 항목 정보가 마지막으로 수정된 날짜 및 시간을 저장하는 필드입니다.
 }

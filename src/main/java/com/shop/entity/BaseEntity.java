@@ -18,8 +18,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  *
  * BaseEntity를 상속받는 모든 엔티티는 자동으로 생성 시간, 수정 시간, 생성자, 수정자를 기록합니다.
  */
-@EntityListeners(value = {AuditingEntityListener.class})
-@MappedSuperclass
+@EntityListeners(value = {AuditingEntityListener.class}) // 📘 엔티티의 생성 및 수정 시 이벤트 리스너로 동작
+@MappedSuperclass // 📘 부모 클래스를 테이블로 생성하지 않고, 상속받는 자식 클래스의 테이블에 속성을 추가
 @Getter
 public abstract class BaseEntity extends BaseTimeEntity{
     // 📘 BaseTimeEntity를 상속받아 regTime, updateTime 속성도 함께 상속합니다.

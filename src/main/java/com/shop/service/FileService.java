@@ -36,6 +36,12 @@ public class FileService {
      */
     public String uploadFile(String uploadPath, String originalFileName, byte[] fileData) throws Exception {
 
+        //  **경로가 없으면 디렉터리 생성**
+        File directory = new File(uploadPath);
+        if (!directory.exists()) {
+            directory.mkdirs(); // **디렉터리 생성**
+        }
+
         // 1️⃣ **파일 이름 생성**: UUID를 통해 고유한 파일 이름을 만듭니다.
         UUID uuid = UUID.randomUUID(); // 랜덤한 UUID 생성 (예: f81d4fae-7dec-11d0-a765-00a0c91e6bf6)
 

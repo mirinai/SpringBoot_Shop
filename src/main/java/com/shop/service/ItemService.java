@@ -1,15 +1,18 @@
 package com.shop.service;
 
 import com.shop.dto.ItemFormDto; // ItemFormDto import (상품 등록 폼 데이터를 전달하는 DTO)
+import com.shop.dto.ItemImgDto;
 import com.shop.entity.Item; // Item 엔티티 import (상품 엔티티)
 import com.shop.entity.ItemImg; // ItemImg 엔티티 import (상품 이미지 엔티티)
 import com.shop.repository.ItemImgRepository; // ItemImgRepository import (상품 이미지 리포지토리)
 import com.shop.repository.ItemRepository; // ItemRepository import (상품 리포지토리)
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor; // Lombok의 @RequiredArgsConstructor import (final 필드를 포함한 생성자 자동 생성)
 import org.springframework.stereotype.Service; // 스프링의 @Service 어노테이션 import (서비스 클래스임을 명시)
 import org.springframework.transaction.annotation.Transactional; // 스프링의 @Transactional 어노테이션 import (트랜잭션 처리)
 import org.springframework.web.multipart.MultipartFile; // 스프링의 MultipartFile import (파일 업로드를 다루기 위한 클래스)
 
+import java.util.ArrayList;
 import java.util.List; // 자바의 List 인터페이스 import (이미지 파일 리스트를 다루기 위해 사용)
 
 /**
@@ -125,4 +128,84 @@ public class ItemService {
          */
         return item.getId(); // 저장된 상품의 **고유 ID**를 반환합니다.
     }
+
+    /**
+     * 📘 **상품 상세 정보 조회 메서드 (getItemDtl)**
+     *
+     * @param itemId 조회할 상품의 ID
+     * @return 상품의 상세 정보(ItemFormDto 객체)
+     *
+     * 🛠️ **주요 동작**
+     * 1️⃣ **상품 이미지 조회**:
+     *   - 상품 ID를 기준으로 **ItemImg 테이블**에서 이미지를 조회.
+     *   - 조회한 이미지를 ItemImgDto 리스트로 변환.
+     *
+     * 2️⃣ **상품 정보 조회**:
+     *   - 상품 ID를 기준으로 **Item 테이블**에서 상품 정보를 조회.
+     *
+     * 3️⃣ **상품과 이미지 정보를 통합**:
+     *   - Item 엔티티 정보를 ItemFormDto로 변환.
+     *   - 이미지 리스트(ItemImgDto)를 ItemFormDto에 추가.
+     *
+     * 4️⃣ **결과 반환**:
+     *   - 완성된 ItemFormDto 객체 반환.
+     */
+    @Transactional(readOnly = true) // **읽기 전용 트랜잭션**으로 설정: 데이터를 변경하지 않으므로 성능 최적화.
+    public ItemFormDto getItemDtl(Long itemId) {
+
+        /**
+         * 1️⃣ **상품 이미지 조회**
+         * - ItemImgRepository의 findByItemIdOrderByIdAsc 메서드를 호출하여,
+         *   **상품 ID를 기준으로 상품 이미지 정보를 조회**합니다.
+         * - **정렬 기준**: ID 오름차순(ASC).
+         */
+        List<ItemImg> itemImgList = itemImgRepository.findByItemIdOrderByIdAsc(itemId);
+
+        /**
+         * 2️⃣ **ItemImgDto 리스트 생성**
+         * - 조회한 ItemImg 엔티티 리스트를 기반으로 ItemImgDto 리스트를 생성합니다.
+         */
+        List<ItemImgDto> itemImgDtoList = new ArrayList<>(); // **ItemImgDto 리스트**를 생성합니다.
+
+        for (ItemImg itemImg : itemImgList) { // 조회한 ItemImg 리스트를 순회합니다.
+
+            /**
+             * - ItemImg 엔티티를 ItemImgDto로 변환합니다.
+             * - of 메서드는 ItemImg 엔티티 데이터를 ItemImgDto 객체로 변환하는 정적 메서드입니다.
+             */
+            ItemImgDto itemImgDto = ItemImgDto.of(itemImg);
+            itemImgDtoList.add(itemImgDto); // 변환된 ItemImgDto 객체를 리스트에 추가합니다.
+        }
+
+        /**
+         * 3️⃣ **상품 정보 조회**
+         * - ItemRepository의 findById 메서드를 호출하여,
+         *   **상품 ID를 기준으로 Item 엔티티를 조회**합니다.
+         * - 조회 결과가 없으면 EntityNotFoundException 예외를 발생시킵니다.
+         */
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(EntityNotFoundException::new); // **엔티티가 없을 경우 예외 발생.**
+
+        /**
+         * 4️⃣ **ItemFormDto 생성**
+         *
+         * - 조회한 Item 엔티티 데이터를 기반으로 ItemFormDto 객체를 생성합니다.
+         * - of 메서드는 Item 엔티티 데이터를 ItemFormDto로 변환하는 정적 메서드입니다.
+         */
+        ItemFormDto itemFormDto = ItemFormDto.of(item);
+
+        /**
+         * 5️⃣ **상품 이미지 리스트 추가**
+         * - ItemFormDto 객체에 ItemImgDto 리스트를 추가합니다.
+         */
+        itemFormDto.setItemImgDtoList(itemImgDtoList);
+
+        /**
+         * 6️⃣ **결과 반환**
+         * - 완성된 ItemFormDto 객체를 반환합니다.
+         */
+        return itemFormDto; // **상품 상세 정보 DTO를 반환.**
+    }
+
 }
+

@@ -2,12 +2,14 @@ package com.shop.controller;
 
 import com.shop.dto.ItemFormDto; // **상품 등록/수정 시 사용하는 DTO** (Data Transfer Object)
 import com.shop.service.ItemService; // **상품 등록 서비스** (ItemService) 임포트
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid; // **유효성 검사를 위해 사용**하는 @Valid 어노테이션
 import lombok.RequiredArgsConstructor; // **final 필드에 생성자를 자동으로 추가**해주는 Lombok의 어노테이션
 import org.springframework.stereotype.Controller; // **Spring MVC의 컨트롤러**로 등록하는 어노테이션
 import org.springframework.ui.Model; // **뷰(View)로 데이터를 전달**하기 위해 사용되는 객체
 import org.springframework.validation.BindingResult; // **유효성 검사 결과를 담는 객체**
 import org.springframework.web.bind.annotation.GetMapping; // **GET 요청을 처리**하기 위한 어노테이션
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping; // **POST 요청을 처리**하기 위한 어노테이션
 import org.springframework.web.bind.annotation.RequestParam; // **요청 파라미터를 매핑**하는 어노테이션
 import org.springframework.web.multipart.MultipartFile; // **파일 업로드**를 위해 사용하는 객체
@@ -125,4 +127,26 @@ public class ItemController {
         // **메인 페이지로 리다이렉트**: 등록 성공 시, 메인 페이지로 이동합니다.
         return "redirect:/";
     }
+
+    /**
+     * 📘 **상품 상세 정보 조회 메서드**
+     *
+     * @param itemId **URL 경로에서 전달된 상품 ID**
+     * @param model **뷰(View)로 데이터를 전달하기 위한 객체**
+     * @return **item/itemForm 뷰 페이지로 이동**
+     */
+    @GetMapping(value = "/admin/item/{itemId}") // URL 경로에 있는 {itemId}를 매핑
+    public String itemDtl(@PathVariable("itemId") Long itemId, Model model) {
+
+        try {
+            ItemFormDto itemFormDto = itemService.getItemDtl(itemId); // 상품 정보 조회
+            model.addAttribute("itemFormDto", itemFormDto); // 뷰에 상품 정보 전달
+        } catch (EntityNotFoundException e) {
+            model.addAttribute("errorMessage", "없는 상품입니다."); // 에러 메시지 전달
+            model.addAttribute("itemFormDto", new ItemFormDto()); // 빈 폼 데이터 전달
+            return "item/itemForm"; // 상품 등록/수정 폼으로 이동
+        }
+        return "item/itemForm"; // 상품 등록/수정 폼으로 이동
+    }
+
 }

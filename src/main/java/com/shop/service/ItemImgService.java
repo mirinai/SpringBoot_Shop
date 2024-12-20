@@ -2,6 +2,7 @@ package com.shop.service;
 
 import com.shop.entity.ItemImg; // ItemImg 엔티티 import
 import com.shop.repository.ItemImgRepository; // ItemImgRepository 리포지토리 import
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor; // Lombok의 @RequiredArgsConstructor import (final 필드를 포함한 생성자 자동 생성)
 import org.springframework.beans.factory.annotation.Value; // @Value 어노테이션 import (application.properties의 프로퍼티를 불러오기 위해 사용)
 import org.springframework.stereotype.Service; // @Service 어노테이션 import (서비스 클래스임을 명시)
@@ -121,5 +122,32 @@ public class ItemImgService {
          * - itemImgRepository의 save() 메서드를 호출하여 **상품 이미지 정보를 데이터베이스에 저장**합니다.
          */
         itemImgRepository.save(itemImg); // 데이터베이스에 저장
+    }
+
+    /**
+     * 📘 **상품 이미지 수정 메서드 (updateItemImg)**
+     *
+     * @param itemImgId 수정할 이미지의 ID
+     * @param itemImgFile 업로드된 이미지 파일
+     * @throws Exception 예외가 발생할 수 있음
+     */
+    public void updateItemImg(Long itemImgId, MultipartFile itemImgFile) throws Exception {
+        if (!itemImgFile.isEmpty()) { // 업로드된 파일이 있을 때만 동작
+            ItemImg savedItemImg = itemImgRepository.findById(itemImgId)
+                    .orElseThrow(EntityNotFoundException::new); // 이미지가 없을 경우 예외 발생
+
+            // 기존 이미지가 있으면 삭제
+            if (!org.springframework.util.StringUtils.hasText(savedItemImg.getImgName())) {
+                fileService.deleteFile(itemImgLocation + "/" + savedItemImg.getImgName()); // 기존 이미지 파일 삭제
+            }
+
+            // 새 이미지 파일 업로드
+            String oriImgName = itemImgFile.getOriginalFilename(); // 원본 파일명 가져오기
+            String imgName = fileService.uploadFile(itemImgLocation, oriImgName, itemImgFile.getBytes()); // 파일 업로드
+            String imgUrl = "/images/item/" + imgName; // 이미지 URL 생성
+
+            // ItemImg 엔티티에 새 이미지 정보 업데이트
+            savedItemImg.updateItemImg(oriImgName, imgName, imgUrl); // 이미지 정보 업데이트
+        }
     }
 }

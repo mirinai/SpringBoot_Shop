@@ -149,4 +149,39 @@ public class ItemController {
         return "item/itemForm"; // 상품 등록/수정 폼으로 이동
     }
 
+    /**
+     * 📘 **상품 수정 메서드 (itemUpdate)**
+     *
+     * @param itemFormDto **수정할 상품 정보 DTO**
+     * @param bindingResult **유효성 검사 결과**
+     * @param itemImgFileList **수정할 이미지 파일 리스트**
+     * @param model **뷰에 데이터 전달 객체**
+     * @return **수정 완료 후 메인 페이지 리다이렉트**
+     */
+    @PostMapping(value = "/admin/item/{itemId}")
+    public String itemUpdate(@Valid ItemFormDto itemFormDto,
+                             BindingResult bindingResult,
+                             @RequestParam("itemImgFile") List<MultipartFile> itemImgFileList,
+                             Model model) {
+
+        if (bindingResult.hasErrors()) { // 유효성 검사 실패 시 폼으로 이동
+            return "item/itemForm";
+        }
+
+        if (itemImgFileList.get(0).isEmpty() && itemFormDto.getId() == null) {
+            model.addAttribute("errorMessage", "첫번째 상품 이미지는 필수 입력 값입니다.");
+            return "item/itemForm"; // 첫 번째 이미지가 없을 때 폼으로 이동
+        }
+
+        try {
+            itemService.updateItem(itemFormDto, itemImgFileList); // 상품 정보 및 이미지 수정
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "상품 수정 중 문제가 일어났습니다.");
+            return "item/itemForm"; // 예외 발생 시 폼으로 이동
+        }
+
+        return "redirect:/"; // 수정 완료 후 메인 페이지로 리다이렉트
+    }
+
+
 }

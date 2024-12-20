@@ -32,7 +32,8 @@ public class ItemFormDto {
 
     private List<ItemImgDto> itemImgDtoList = new ArrayList<>(); // 상품 이미지 정보를 담고 있는 리스트
 
-    private List<Long> itemIds = new ArrayList<>(); // 여러 개의 Item ID를 담고 있는 리스트
+
+    private List<Long> itemImgIds = new ArrayList<>();
 
     private static ModelMapper modelMapper = new ModelMapper(); // 정적 ModelMapper 인스턴스를 생성하여 재사용합니다.
 

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout1}"
+>
+  <th:block layout:fragment="script">
+    <script th:inline="javascript">
+      // // 문서가 준비되었을 때 실행되는 함수
+      // $(document).ready(function () {
+      //   // 검색 버튼 클릭 이벤트 핸들러
+      //   $("#searchBtn").on("click", function (e) {
+      //     e.preventDefault(); // 버튼의 기본 동작(페이지 리로드 등)을 방지
+      //     page(0); // 첫 번째 페이지(0번 페이지)로 이동
+      //   });
+      // });
+
+      // DOMContentLoaded 이벤트 리스너 등록
+      // - HTML 문서가 모두 로드되고 DOM 트리가 완성되었을 때 실행
+      document.addEventListener("DOMContentLoaded", function () {
+        // 검색 버튼 요소 가져오기
+        const searchBtn = document.getElementById("searchBtn");
+
+        // 검색 버튼이 존재할 경우 클릭 이벤트 리스너 추가
+        if (searchBtn) {
+          searchBtn.addEventListener("click", function (e) {
+            e.preventDefault(); // 버튼 클릭 시 기본 동작(페이지 리로드 등)을 방지
+            page(0); // page 함수 호출: 첫 번째 페이지(0번 페이지)로 이동
+          });
+        }
+      });
+
+      function page(page) {
+        // 검색 조건을 HTML 요소에서 가져옴
+        const searchDateType = document.getElementById("searchDateType").value;
+        const searchSellStatus =
+          document.getElementById("searchSellStatus").value;
+        const searchBy = document.getElementById("searchBy").value;
+        const searchQuery = document.getElementById("searchQuery").value;
+
+        // URLSearchParams를 사용하여 쿼리 문자열 생성
+        const searchParams = new URLSearchParams({
+          searchDateType: searchDateType,
+          searchSellStatus: searchSellStatus,
+          searchBy: searchBy,
+          searchQuery: searchQuery,
+        });
+
+        // location.href를 사용해 URL 이동
+        location.href = `/admin/items/${page}?${searchParams.toString()}`;
+      }
+
+      // // 페이지 이동 및 검색 조건 처리 함수
+      // function page(page) {
+      //   // 검색 조건을 HTML 요소에서 가져옴
+      //   var searchDateType = $("#searchDateType").val(); // 검색 날짜 유형 (예: 전체, 하루, 한 달 등)
+      //   var searchSellStatus = $("#searchSellStatus").val(); // 판매 상태 (예: 판매 중, 품절 등)
+      //   var searchBy = $("#searchBy").val(); // 검색 기준 (예: 상품명, 등록자 등)
+      //   var searchQuery = $("#searchQuery").val(); // 검색어 입력 값
+
+      //   // location.href를 사용해 지정된 URL로 이동
+      //   // - page: 이동할 페이지 번호
+      //   // - searchDateType, searchSellStatus, searchBy, searchQuery는 검색 조건으로 URL에 포함됨
+      //   location.href =
+      //     "/admin/items/" +
+      //     page +
+      //     "?searchDateType=" +
+      //     encodeURIComponent(searchDateType) +
+      //     "&searchSellStatus=" +
+      //     encodeURIComponent(searchSellStatus) +
+      //     "&searchBy=" +
+      //     encodeURIComponent(searchBy) +
+      //     "&searchQuery=" +
+      //     encodeURIComponent(searchQuery);
+      // }
+      // ==
+
+      // document.addEventListener("DOMContentLoaded", function () {
+      //   const searchBtn = document.getElementById("searchBtn");
+      //   if (searchBtn) {
+      //     searchBtn.addEventListener("click", function (e) {
+      //       e.preventDefault();
+      //       page(0);
+      //     });
+      //   }
+      // });
+
+      // function page(page) {
+      //   const searchDateType = document.getElementById("searchDateType").value;
+      //   const searchSellStatus =
+      //     document.getElementById("searchSellStatus").value;
+      //   const searchBy = document.getElementById("searchBy").value;
+      //   const searchQuery = document.getElementById("searchQuery").value;
+
+      //   location.href =
+      //     "/admin/items/" +
+      //     page +
+      //     "?searchDateType=" +
+      //     encodeURIComponent(searchDateType) +
+      //     "&searchSellStatus=" +
+      //     encodeURIComponent(searchSellStatus) +
+      //     "&searchBy=" +
+      //     encodeURIComponent(searchBy) +
+      //     "&searchQuery=" +
+      //     encodeURIComponent(searchQuery);
+      // }
+    </script>
+  </th:block>
+
+  <th:block layout:fragment="css">
+    <style>
+      select {
+        margin-right: 10px;
+      }
+    </style>
+  </th:block>
+  <div layout:fragment="content">
+    <!-- 상품 목록 및 검색 폼을 포함하는 콘텐츠 영역 -->
+
+    <!-- 검색 및 페이징 처리를 위한 폼 -->
+    <form
+      th:action="@{'/admin/items/'+${items.number}}"
+      role="form"
+      method="get"
+      th:object="${items}"
+    >
+      <!-- Thymeleaf에서 사용될 데이터 객체 -->
+
+      <!-- 상품 목록 테이블 -->
+      <table class="table">
+        <thead>
+          <!-- 테이블 헤더 -->
+          <tr>
+            <td>상품아이디</td>
+            <!-- 상품 ID -->
+            <td>상품이름</td>
+            <!-- 상품 이름 -->
+            <td>상태</td>
+            <!-- 상품 상태 -->
+            <td>등록자</td>
+            <!-- 상품 등록자 -->
+            <td>등록일</td>
+            <!-- 상품 등록일 -->
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 상품 데이터 반복 렌더링 -->
+          <tr th:each="item, status: ${items.getContent()}">
+            <td th:text="${item.id}"></td>
+            <!-- 상품 ID 출력 -->
+            <td>
+              <a
+                th:href="'/admin/item/'+${item.id}"
+                th:text="${item.itemNm}"
+              ></a
+              ><!-- 상품 상세페이지링크 -->
+              <!-- 상품이름출력 -->
+            </td>
+            <td
+              th:text="${item.itemSellStatus == T(com.shop.constant.itemSellStatus).SELL} ? '판매하고 있음' : '다팔림'"
+            >
+              <!-- 판매 상태를 조건에 따라 출력 -->
+            </td>
+            <td th:text="${item.createdBy}"></td>
+            <!-- 상품 등록자 출력 -->
+            <td th:text="${item.regTime}"></td>
+            <!-- 상품 등록일 출력 -->
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 페이지네이션 -->
+      <div
+        th:with="start=${(items.number/maxPage)*maxPage +1},
+      end=(${(items.totalPages == 0) ? 1 : (start + (maxPage - 1) < items.totalPages ? start + (maxPage - 1) : items.totalPages)})"
+      >
+        <!-- 시작 페이지(start)와 끝 페이지(end)를 계산-->
+
+        <ul class="pagination justify-content-center">
+          <!-- 이전 페이지 버튼 -->
+          <li class="page-item" th:classappend="${item.first}?'disabled'">
+            <a
+              th:onclick="'javascript:page(' +${items.number - 1} +')'"
+              aria-label="Previous"
+              class="page-link"
+            >
+              <span aria-hidden="true">Previous</span>
+            </a>
+          </li>
+
+          <!-- 페이지 번호 버튼 -->
+          <li
+            class="page-item"
+            th:each="page:${#numbers.sequence(start, end)}"
+            th:classappend="${#items.number eq page-1}?'active':''"
+          >
+            <a
+              th:onclick="'javascript:page(' + ${page - 1} + ')'"
+              th:inline="text"
+              class="page-link"
+              >[[${page}]]</a
+            >
+          </li>
+
+          <!-- 다음 페이지 버튼 -->
+          <li class="page-item" th:classappend="${items.last}?'disabled'">
+            <a
+              th:onclick="'javascript:page(' + ${items.number + 1} +')'"
+              aria-label="Next"
+              class="page-link"
+            >
+              <span aria-hidden="true">Next</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 검색 조건 입력 영역 -->
+      <div
+        class="form-inline justify-content-center"
+        th:object="${itemSearchDto}"
+      >
+        <!-- th:object="${itemSearchDto}" : 검색 조건 객체 -->
+
+        <!-- 검색 날짜 유형 선택 -->
+        <select
+          th:field="*{searchDateType}"
+          class="form-control"
+          style="width: auto"
+        >
+          <option value="all">전체기간</option>
+          <option value="1d">1일</option>
+          <option value="1w">1주</option>
+          <option value="1m">1개월</option>
+          <option value="6m">6개월</option>
+        </select>
+
+        <!-- 판매 상태 선택 -->
+        <section
+          th:field="*{searchSellStatus}"
+          class="form-control"
+          style="width: auto"
+        >
+          <option value="">판매상태(전체)</option>
+          <option value="SELL">판매</option>
+          <option value="SOLD_OUT">품절</option>
+        </section>
+
+        <!-- 검색 기준 선택 -->
+        <select th:field="*{searchBy}" class="form-control" style="width: auto">
+          <option value="itemNm">상품이름</option>
+          <option value="createdBy">등록자</option>
+        </select>
+
+        <!-- 검색어 입력 -->
+        <input
+          th:field="*{searchQuery}"
+          type="text"
+          class="form-control"
+          placeholder="검색어를 입력하세요"
+        />
+        <!-- 검색 버튼 -->
+        <button id="searchBtn" type="submit" class="btn btn-primary">
+          검색
+        </button>
+      </div>
+    </form>
+  </div>
+</html>

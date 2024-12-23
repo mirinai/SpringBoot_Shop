@@ -29,7 +29,6 @@ public class OrderItem extends BaseEntity{
     // OrderItem을 조회할 때 Order는 로드되지 않고, **필요할 때만 조회**됩니다.
     // **order.getXXX() 메서드를 호출할 때 프록시가 초기화**되어 **데이터베이스에서 조회**가 일어납니다.
     @JoinColumn(name = "order_id") // 외래 키(Foreign Key)로 "order_id" 컬럼에 매핑합니다.
-    // **order_id 외래 키(Foreign Key)**로 매핑합니다.
     // Order 테이블의 기본 키(PK)를 OrderItem 테이블의 order_id 컬럼에 외래 키로 저장합니다.
     private Order order; // 주문 항목이 속한 주문(Order) 객체를 나타냅니다.
 

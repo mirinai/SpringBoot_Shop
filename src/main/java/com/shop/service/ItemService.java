@@ -2,6 +2,7 @@ package com.shop.service;
 
 import com.shop.dto.ItemFormDto; // 상품 등록 폼 데이터를 담는 DTO
 import com.shop.dto.ItemImgDto; // 상품 이미지 정보를 담는 DTO
+import com.shop.dto.ItemSearchDto;
 import com.shop.entity.Item; // Item 엔티티 (상품 엔티티)
 import com.shop.entity.ItemImg; // ItemImg 엔티티 (상품 이미지 엔티티)
 import com.shop.repository.ItemImgRepository; // 상품 이미지 리포지토리
@@ -9,6 +10,8 @@ import com.shop.repository.ItemRepository; // 상품 리포지토리
 import jakarta.persistence.EntityNotFoundException; // 엔티티를 찾을 수 없는 경우 발생하는 예외
 import lombok.RequiredArgsConstructor; // final 필드에 대한 생성자를 자동으로 생성
 import org.springframework.beans.factory.annotation.Value; // application.properties에 정의된 값을 주입받기 위해 사용
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service; // 스프링의 서비스 어노테이션
 import org.springframework.transaction.annotation.Transactional; // 트랜잭션 관리
 import org.springframework.util.StringUtils; // 문자열 유틸리티
@@ -111,6 +114,19 @@ public class ItemService {
 
         // 3️⃣ **수정된 상품의 ID 반환**
         return item.getId();
+    }
+
+    /**
+     * 📘 **관리자 상품 페이지 조회 메서드 (getAdminItemPage)**
+     *
+     * @param itemSearchDto 상품 검색 조건을 담은 DTO
+     * @param pageable 페이징 정보를 담은 객체 (페이지 번호, 크기 등)
+     * @return 조건에 맞는 상품 데이터를 페이징 처리하여 반환 (Page<Item> 객체)
+     */
+    @Transactional(readOnly = true) // 읽기 전용 트랜잭션으로 설정 (성능 최적화)
+    public Page<Item> getAdminItemPage(ItemSearchDto itemSearchDto, Pageable pageable) {
+        // ItemRepository에서 Querydsl로 구현된 getAdminItemPage 메서드를 호출
+        return itemRepository.getAdminItemPage(itemSearchDto, pageable);
     }
 
 }

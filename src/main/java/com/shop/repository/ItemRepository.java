@@ -9,8 +9,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 // ItemRepository 인터페이스 정의
-// JpaRepository와 QuerydslPredicateExecutor 인터페이스를 상속받아 데이터 접근 및 Querydsl의 동적 쿼리 기능을 제공
-public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredicateExecutor<Item> {
+// JpaRepository와 QuerydslPredicateExecutor, ItemRepositoryCustom 인터페이스를 상속받아
+// 기본 CRUD, Querydsl을 활용한 동적 쿼리, 사용자 정의 쿼리 기능을 제공
+public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredicateExecutor<Item>, ItemRepositoryCustom {
     // JpaRepository<Item, Long>
     // - Spring Data JPA에서 제공하는 기본 CRUD 메서드 및 페이징 기능을 지원
     // - 제네릭 타입 Item: 엔티티 클래스

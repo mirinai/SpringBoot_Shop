@@ -1,10 +1,15 @@
 package com.shop.controller;
 
 import com.shop.dto.ItemFormDto; // **상품 등록/수정 시 사용하는 DTO** (Data Transfer Object)
+import com.shop.dto.ItemSearchDto;
+import com.shop.entity.Item;
 import com.shop.service.ItemService; // **상품 등록 서비스** (ItemService) 임포트
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid; // **유효성 검사를 위해 사용**하는 @Valid 어노테이션
 import lombok.RequiredArgsConstructor; // **final 필드에 생성자를 자동으로 추가**해주는 Lombok의 어노테이션
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller; // **Spring MVC의 컨트롤러**로 등록하는 어노테이션
 import org.springframework.ui.Model; // **뷰(View)로 데이터를 전달**하기 위해 사용되는 객체
 import org.springframework.validation.BindingResult; // **유효성 검사 결과를 담는 객체**
@@ -14,7 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping; // **POST 요청을 
 import org.springframework.web.bind.annotation.RequestParam; // **요청 파라미터를 매핑**하는 어노테이션
 import org.springframework.web.multipart.MultipartFile; // **파일 업로드**를 위해 사용하는 객체
 
+
 import java.util.List; // **이미지 파일 리스트**를 다루기 위해 사용하는 자바의 List 인터페이스
+import java.util.Optional;
 
 /**
  * 📘 **ItemController 클래스**
@@ -182,6 +189,38 @@ public class ItemController {
 
         return "redirect:/"; // 수정 완료 후 메인 페이지로 리다이렉트
     }
+
+    /**
+     * 관리자 상품 관리 페이지 컨트롤러 메서드
+     *
+     * 역할:
+     * - 상품 검색 조건과 페이징 정보를 기반으로 상품 목록을 조회하여 뷰로 전달
+     * - 페이지 번호가 주어지지 않으면 기본값(0 페이지)으로 처리
+     *
+     * @param itemSearchDto 검색 조건을 담은 DTO 객체
+     * @param page 페이지 번호 (없을 경우 기본값 0)
+     * @param model 뷰에 데이터를 전달하는 객체
+     * @return 상품 관리 페이지 템플릿 이름 ("item/itemMng")
+     */
+    @GetMapping(value = {"/admin/items", "/admin/items/{page}"})
+    public String itemManage(ItemSearchDto itemSearchDto,
+                             @PathVariable(value = "page", required = false) Integer page,
+                             Model model) {
+        // 1️⃣ 페이징 정보 생성: page가 null이면 0 페이지를 기본값으로 설정, 페이지 크기는 3
+        Pageable pageable = PageRequest.of(page != null ? page : 0, 3);
+
+        // 2️⃣ 상품 목록 조회: 검색 조건과 페이징 정보를 이용해 상품 목록 조회
+        Page<Item> items = itemService.getAdminItemPage(itemSearchDto, pageable);
+
+        // 3️⃣ 뷰에 데이터 전달
+        model.addAttribute("items", items); // 조회된 상품 목록
+        model.addAttribute("itemSearchDto", itemSearchDto); // 검색 조건
+        model.addAttribute("maxPage", 5); // 페이지 네비게이션 최대 표시 페이지 수
+
+        // 4️⃣ 뷰 템플릿 경로 반환
+        return "item/itemMng"; // 상품 관리 페이지 템플릿
+    }
+
 
 
 }

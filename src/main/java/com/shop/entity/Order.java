@@ -12,7 +12,7 @@ import java.util.List;
 @Entity // JPA의 엔티티(Entity)임을 명시하며, 이 클래스는 데이터베이스 테이블과 매핑됩니다.
 @Table(name = "orders") // 테이블과 매핑할 이름을 "orders"로 지정합니다.
 @Getter @Setter // 롬복(Lombok) 어노테이션으로, getter와 setter 메서드를 자동 생성합니다.
-public class Order {
+public class Order extends BaseEntity{
 
     @Id // 이 필드가 테이블의 기본 키(Primary Key)임을 명시합니다.
     @GeneratedValue // 기본 키 값을 자동으로 생성(자동 증가)합니다.
@@ -39,7 +39,7 @@ public class Order {
     // **하나의 주문(Order)에는 여러 개의 주문 항목(OrderItem)이 포함**될 수 있습니다.
 
 
-    private LocalDateTime regTime; // 주문이 처음 생성된 날짜 및 시간을 저장하는 필드입니다.
-
-    private LocalDateTime updateTime; // 주문 정보가 마지막으로 수정된 날짜 및 시간을 저장하는 필드입니다.
+//    private LocalDateTime regTime; // 주문이 처음 생성된 날짜 및 시간을 저장하는 필드입니다.
+//
+//    private LocalDateTime updateTime; // 주문 정보가 마지막으로 수정된 날짜 및 시간을 저장하는 필드입니다.
 }

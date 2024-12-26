@@ -3,6 +3,7 @@ package com.shop.service;
 import com.shop.dto.ItemFormDto; // 상품 등록 폼 데이터를 담는 DTO
 import com.shop.dto.ItemImgDto; // 상품 이미지 정보를 담는 DTO
 import com.shop.dto.ItemSearchDto;
+import com.shop.dto.MainItemDto;
 import com.shop.entity.Item; // Item 엔티티 (상품 엔티티)
 import com.shop.entity.ItemImg; // ItemImg 엔티티 (상품 이미지 엔티티)
 import com.shop.repository.ItemImgRepository; // 상품 이미지 리포지토리
@@ -127,6 +128,11 @@ public class ItemService {
     public Page<Item> getAdminItemPage(ItemSearchDto itemSearchDto, Pageable pageable) {
         // ItemRepository에서 Querydsl로 구현된 getAdminItemPage 메서드를 호출
         return itemRepository.getAdminItemPage(itemSearchDto, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MainItemDto> getMainItemPage(ItemSearchDto itemSearchDto, Pageable pageable){
+        return itemRepository.getMainItemPage(itemSearchDto, pageable);
     }
 
 }

@@ -5,8 +5,11 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shop.constant.ItemSellStatus;
 import com.shop.dto.ItemSearchDto;
+import com.shop.dto.MainItemDto;
+import com.shop.dto.QMainItemDto;
 import com.shop.entity.Item;
 import com.shop.entity.QItem;
+import com.shop.entity.QItemImg;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -131,5 +134,75 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom{
         // Page 객체 반환
         //        return new PageImpl<>(content,pageable,total);
         return new PageImpl<>(content, pageable, total != null ? total : 0); // 데이터와 페이징 정보 포함하여 반환
+    }
+
+    private BooleanExpression itemNmLike(String searchQuery){
+        return StringUtils.isEmpty(searchQuery) ? null : QItem.item.itemNm.like("%" + searchQuery + "%");
+    }
+
+    @Override
+    public Page<MainItemDto> getMainItemPage(ItemSearchDto itemSearchDto, Pageable pageable){
+
+        QItem item = QItem.item;
+        QItemImg itemImg = QItemImg.itemImg;
+
+//        QueryResults<MainItemDto> results = queryFactory
+//                .select(
+//                        new QMainItemDto(
+//                                item.id,
+//                                item.itemNm,
+//                                item.itemDetail,
+//                                item.itemDetail,
+//                                itemImg.imgUrl,
+//                                item.price
+//                        )
+//                )
+//                .from(itemImg)
+//                .join(itemImg.item, item)
+//                .where(itemImg.repImgYn.eq("Y"))
+//                .where(itemNmLike(itemSearchDto.getSearchQuery()))
+//                .orderBy(item.id.desc())
+//                .offset(pageable.getOffset())
+//                .limit(pageable.getPageSize())
+//                .fetchResults();
+//
+//        List<MainItemDto> content = results.getResults();
+//        long total = results.getTotal();
+//        return new PageImpl<>(content, pageable, total);
+        // 데이터 리스트 조회
+        List<MainItemDto> content = queryFactory
+                .select(
+                        new QMainItemDto(
+                                item.id,
+                                item.itemNm,
+                                item.itemDetail,
+                                itemImg.imgUrl,
+                                item.price
+                        )
+                )
+                .from(itemImg)
+                .join(itemImg.item, item)
+                .where(itemImg.repImgYn.eq("Y"))
+                .where(itemNmLike(itemSearchDto.getSearchQuery()))
+                .orderBy(item.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        // 총 개수 조회
+        Long totalCount = queryFactory
+                .select(item.count())
+                .from(itemImg)
+                .join(itemImg.item, item)
+                .where(itemImg.repImgYn.eq("Y"))
+                .where(itemNmLike(itemSearchDto.getSearchQuery()))
+                .fetchOne();
+
+        // null 체크 후 기본값 처리
+        long total = (totalCount != null) ? totalCount : 0;
+
+        // Page 객체 반환
+        return new PageImpl<>(content, pageable, total);
+
     }
 }

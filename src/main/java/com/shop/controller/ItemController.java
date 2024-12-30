@@ -222,5 +222,22 @@ public class ItemController {
     }
 
 
+    @GetMapping(value = "/item/{itemId}")
+    public String itemDtl(Model model, @PathVariable("itemId") Long itemId) {
+        // itemId를 기반으로 특정 상품의 상세 정보를 조회하여 모델에 담아 뷰로 전달하는 메서드
+
+        // 서비스 계층에서 상품 상세 정보를 가져옴
+        ItemFormDto itemFormDto = itemService.getItemDtl(itemId);
+
+        // 뷰에서 사용할 수 있도록 모델에 "item" 이름으로 데이터 추가
+        model.addAttribute("item", itemFormDto);
+
+        // "item/itemDtl" 뷰를 반환 (템플릿 경로 기준으로 반환)
+        return "item/itemDtl";
+    }
+
+
+
+
 
 }

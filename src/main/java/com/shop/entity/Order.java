@@ -42,4 +42,37 @@ public class Order extends BaseEntity{
 //    private LocalDateTime regTime; // 주문이 처음 생성된 날짜 및 시간을 저장하는 필드입니다.
 //
 //    private LocalDateTime updateTime; // 주문 정보가 마지막으로 수정된 날짜 및 시간을 저장하는 필드입니다.
+
+
+    // 주문 항목(OrderItem)을 주문(Order)에 추가하는 메서드
+    public void addOrderItem(OrderItem orderItem) {
+        orderItems.add(orderItem); // 주문 항목 리스트에 새로운 주문 항목 추가
+        orderItem.setOrder(this); // 해당 주문 항목에 현재 주문(Order) 객체를 설정
+    }
+
+    // 주문(Order)을 생성하는 정적 팩토리 메서드
+    public static Order createOrder(Member member, List<OrderItem> orderItemList) {
+        Order order = new Order(); // 새로운 주문 객체 생성
+
+        order.setMember(member); // 주문한 회원(Member) 객체 설정
+
+        for (OrderItem orderItem : orderItemList) {
+            order.addOrderItem(orderItem); // 전달받은 주문 항목 리스트를 주문 객체에 추가
+        }
+
+        order.setOrderStatus(OrderStatus.ORDER); // 주문 상태를 'ORDER'로 설정
+        order.setOrderDate(LocalDateTime.now()); // 주문 날짜를 현재 시간으로 설정
+
+        return order; // 생성된 주문 객체 반환
+    }
+
+    // 총 주문 금액을 계산하는 메서드
+    public int getTotalPrice() {
+        int totalPrice = 0; // 총 가격 초기화
+        for (OrderItem orderItem : orderItems) {
+            totalPrice += orderItem.getTotalPrice(); // 각 주문 항목의 총 가격을 더함
+        }
+        return totalPrice; // 계산된 총 가격 반환
+    }
+
 }

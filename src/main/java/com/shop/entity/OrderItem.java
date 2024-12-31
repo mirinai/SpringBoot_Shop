@@ -39,4 +39,21 @@ public class OrderItem extends BaseEntity{
 //    private LocalDateTime regTime; // 주문 항목이 생성된 날짜 및 시간을 저장하는 필드입니다.
 //
 //    private LocalDateTime updateTime; // 주문 항목 정보가 마지막으로 수정된 날짜 및 시간을 저장하는 필드입니다.
+
+    public static OrderItem createOrderItem(Item item, int count){
+        // OrderItem 객체를 생성하는 정적 팩토리 메서드
+        OrderItem orderItem = new OrderItem(); // OrderItem 인스턴스 생성
+        orderItem.setItem(item); // 생성된 OrderItem에 구매할 Item 객체 설정
+        orderItem.setCount(count); // 구매 수량 설정
+        orderItem.setOrderPrice(item.getPrice()); // 아이템의 가격 설정
+
+        item.removeStock(count); // 구매한 수량만큼 재고 차감
+
+        return orderItem; // 완성된 OrderItem 객체 반환
+    }
+
+    public int getTotalPrice(){
+        // 총 가격 계산 메서드: 주문 가격(orderPrice)과 수량(count)을 곱함
+        return orderPrice*count;
+    }
 }

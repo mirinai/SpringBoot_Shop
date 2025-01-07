@@ -31,6 +31,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             // AJAX 요청의 경우 401 Unauthorized 상태 코드를 응답으로 보냄
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
 
+
         }
         else{
             // 일반 요청의 경우 로그인 페이지로 리다이렉트

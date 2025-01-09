@@ -1,20 +1,24 @@
 package com.shop.controller;
 
 import com.shop.dto.OrderDto;
+import com.shop.dto.OrderHistDto;
 import com.shop.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @Controller // Spring MVC의 컨트롤러로 동작하는 클래스임을 명시
 @RequiredArgsConstructor // final 필드에 대한 생성자를 자동 생성하는 Lombok 어노테이션
@@ -58,4 +62,27 @@ public class OrderController {
         // 주문 생성 성공 시 주문 ID와 함께 OK 응답 반환
         return new ResponseEntity<Long>(orderId, HttpStatus.OK);
     }
+
+    // 주문 내역 페이지 조회 메서드
+    @GetMapping(value = {"/orders", "/orders/{page}"})
+// "/orders" 또는 "/orders/{page}" 경로로 GET 요청을 처리
+    public String orderHist(@PathVariable(value = "page", required = false) Integer page, // URL 경로에서 페이지 번호를 가져옴 (없을 경우 null)
+                            Principal principal, // 현재 인증된 사용자의 정보를 가져옴
+                            Model model) { // 뷰에 데이터를 전달하기 위한 객체
+
+        // 페이지 번호가 null이면 0페이지를 기본값으로 설정, 한 페이지에 4개의 데이터 표시
+        Pageable pageable = PageRequest.of(page != null ? page : 0, 4);
+
+        // 로그인한 사용자의 이메일을 기반으로 주문 내역을 페이징 처리하여 가져옴
+        Page<OrderHistDto> orderHistDtoList = orderService.getOrderList(principal.getName(), pageable);
+
+        // 뷰에 전달할 데이터 설정
+        model.addAttribute("orders", orderHistDtoList); // 주문 내역 리스트
+        model.addAttribute("page", pageable.getPageNumber()); // 현재 페이지 번호
+        model.addAttribute("maxPage", 5); // 페이지 네비게이션에서 최대 표시할 페이지 수
+
+        // "order/orderHist.html" 템플릿 파일을 반환하여 주문 내역 페이지 렌더링
+        return "order/orderHist";
+    }
+
 }

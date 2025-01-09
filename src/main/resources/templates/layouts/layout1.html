@@ -22,14 +22,14 @@
 </head>
 <body>
     <!-- 헤더 프래그먼트 포함 -->
-    <div th:replace="fragments/header::header"></div>
+    <div th:replace="~{fragments/header::header}"></div>
 
     <!-- 메인 콘텐츠 영역 -->
     <div layout:fragment="content" class="content">
 
     </div>
     <!-- 푸터 프래그먼트 포함 -->
-    <div th:replace="fragments/footer::footer"></div>
+    <div th:replace="~{fragments/footer::footer}"></div>
 
 </body>
 </html>

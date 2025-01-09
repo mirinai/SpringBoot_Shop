@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,5 +84,40 @@ public class OrderService {
 
         // 주문 내역 리스트를 Page 객체로 반환 (페이징 정보를 포함)
         return new PageImpl<OrderHistDto>(orderHistDtos, pageable, totalCount);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean validateOrder(Long orderId, String email) {
+        // 📝 [메서드 설명]
+        // - 해당 주문이 로그인한 사용자의 주문인지 검증하는 메서드
+        // - 읽기 전용 트랜잭션으로 설정하여 데이터 수정 없이 성능 최적화
+
+        // 현재 로그인한 사용자의 이메일로 회원 엔티티 조회
+        Member curMember = memberRepository.findByEmail(email);
+
+        // 주문 ID로 주문 엔티티 조회. 없을 경우 예외 발생
+        Order order = orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
+
+        // 조회된 주문 엔티티에 저장된 회원 정보
+        Member savedMember = order.getMember();
+
+        // 현재 로그인한 사용자의 이메일과 주문 생성자의 이메일 비교
+        if (!StringUtils.equals(curMember.getEmail(), savedMember.getEmail())) {
+            // 이메일이 다르면 해당 주문을 취소할 권한이 없으므로 false 반환
+            return false;
+        }
+        // 이메일이 같으면 true 반환
+        return true;
+    }
+
+    public void cancelOrder(Long orderId) {
+        // 📝 [메서드 설명]
+        // - 주문을 취소하는 메서드
+
+        // 주문 ID로 주문 엔티티 조회. 없을 경우 예외 발생
+        Order order = orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
+
+        // 주문 취소 메서드 호출 (Order 엔티티의 상태를 'CANCEL'로 변경하고 주문 항목의 재고 복구)
+        order.cancelOrder();
     }
 }

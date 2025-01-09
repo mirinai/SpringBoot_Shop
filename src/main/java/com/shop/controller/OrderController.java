@@ -85,4 +85,28 @@ public class OrderController {
         return "order/orderHist";
     }
 
+    @PostMapping("/order/{orderId}/cancel")
+// HTTP POST 요청을 "/order/{orderId}/cancel" 경로로 매핑합니다.
+// 주문 취소 요청을 처리하는 메서드입니다.
+    public @ResponseBody ResponseEntity cancelOrder
+            (@PathVariable("orderId") Long orderId, Principal principal) {
+        // 📝 [메서드 설명]
+        // - 특정 주문을 취소하는 메서드입니다.
+        // - 주문 ID를 URL 경로에서 가져오고, 현재 로그인한 사용자의 이메일을 Principal 객체에서 가져옵니다.
+        // - 권한 검사를 통해 해당 사용자가 주문을 취소할 권한이 있는지 확인한 후 주문을 취소합니다.
+        // - JSON 응답을 반환하기 위해 @ResponseBody를 사용합니다.
+
+        if (!orderService.validateOrder(orderId, principal.getName())) {
+            // 현재 로그인한 사용자가 해당 주문을 취소할 권한이 있는지 확인
+            // 권한이 없는 경우 HTTP 상태 코드 403(FORBIDDEN)과 메시지를 반환
+            return new ResponseEntity<String>("주문 취소 권한이 없습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        // 주문 취소 권한이 있는 경우 주문 취소 서비스 메서드 호출
+        orderService.cancelOrder(orderId);
+
+        // 취소된 주문 ID와 HTTP 상태 코드 200(OK)을 응답으로 반환
+        return new ResponseEntity<Long>(orderId, HttpStatus.OK);
+    }
+
 }

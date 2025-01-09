@@ -50,22 +50,43 @@ public class Item extends BaseEntity{
 //    private LocalDateTime updateTime; // 수정 시간
 
 
-    public void updateTime(ItemFormDto itemFormDto){
+    public void updateItem(ItemFormDto itemFormDto) {
+        // 📝 [메서드 설명]
+        // - 상품 정보를 업데이트하는 메서드
+        // - ItemFormDto 객체의 정보를 받아서 해당 Item 엔티티의 필드를 변경
 
-        this.itemNm = itemFormDto.getItemNm();
-        this.price = itemFormDto.getPrice();
-        this.stockNumber = itemFormDto.getStockNumber();
-        this.itemDetail = itemFormDto.getItemDetail();
-        this.itemSellStatus = itemFormDto.getItemSellStatus();
+        // 🛠️ [업데이트 내용]
+        // - 상품 이름, 가격, 재고 수량, 상세 설명, 판매 상태를 변경
+        this.itemNm = itemFormDto.getItemNm(); // 상품 이름 업데이트
+        this.price = itemFormDto.getPrice(); // 상품 가격 업데이트
+        this.stockNumber = itemFormDto.getStockNumber(); // 재고 수량 업데이트
+        this.itemDetail = itemFormDto.getItemDetail(); // 상품 상세 설명 업데이트
+        this.itemSellStatus = itemFormDto.getItemSellStatus(); // 상품 판매 상태 업데이트 (판매 중/품절)
     }
 
-    public void removeStock(int stockNumber){
-        int restStock = this.stockNumber - stockNumber;
+    public void removeStock(int stockNumber) {
+        // 📝 [메서드 설명]
+        // - 상품 재고를 감소시키는 메서드
+        // - 요청된 수량만큼 재고를 줄이고, 남은 재고가 0보다 작아질 경우 예외를 발생시킴
 
-        if(restStock<0){
-            throw new OutOfStockException("상품의 재고가 없습니다. (현재 재고 수량: " + this.stockNumber+")");
+        int restStock = this.stockNumber - stockNumber; // 남은 재고 계산
+
+        // ❗ [예외 처리]
+        // - 재고 부족 시 OutOfStockException 발생
+        if (restStock < 0) {
+            throw new OutOfStockException("상품의 재고가 없습니다. (현재 재고 수량: " + this.stockNumber + ")");
         }
-        this.stockNumber=restStock;
+
+        this.stockNumber = restStock; // 재고 수량 업데이트
     }
+
+    public void addStock(int stockNumber) {
+        // 📝 [메서드 설명]
+        // - 상품 재고를 증가시키는 메서드
+        // - 주문 취소 시 해당 상품의 재고를 복구하는 용도로 사용됨
+
+        this.stockNumber += stockNumber; // 재고 수량을 요청된 수량만큼 증가
+    }
+
 }
 

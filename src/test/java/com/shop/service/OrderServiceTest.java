@@ -1,6 +1,7 @@
 package com.shop.service;
 
 import com.shop.constant.ItemSellStatus;
+import com.shop.constant.OrderStatus;
 import com.shop.dto.OrderDto;
 import com.shop.entity.Item;
 import com.shop.entity.Member;
@@ -96,6 +97,42 @@ class OrderServiceTest {
 
         // 실제 주문의 총 금액과 기대 금액이 동일한지 검증
         assertEquals(totalPrice, order.getTotalPrice());
+    }
+
+
+    @Test
+    @DisplayName("주문 취소 테스트") // 테스트 메서드의 이름을 설명하는 어노테이션으로, 테스트 결과 출력 시 표시됩니다.
+    public void cancelOrder() {
+        // 📝 [테스트 설명]
+        // - 상품을 주문한 후 해당 주문을 취소하는 기능을 검증하는 테스트 메서드입니다.
+        // - 주문 상태가 "CANCEL"로 변경되는지 확인하고, 취소 시 재고 수량이 복구되는지 확인합니다.
+
+        // 상품 데이터를 저장하여 테스트용 Item 객체를 생성
+        Item item = saveItem(); // 재고 수량이 100인 상품을 저장
+
+        // 회원 데이터를 저장하여 테스트용 Member 객체를 생성
+        Member member = savaMember(); // 주문을 요청할 테스트 회원 생성
+
+        // 주문 요청 데이터를 생성
+        OrderDto orderDto = new OrderDto();
+        orderDto.setCount(10); // 주문 수량 10개 설정
+        orderDto.setItemId(item.getId()); // 주문할 상품의 ID 설정
+
+        // 주문을 생성하고 해당 주문의 ID를 반환받음
+        Long orderId = orderService.order(orderDto, member.getEmail()); // 회원 이메일을 통해 주문 생성
+
+        // 생성된 주문 ID를 통해 주문 정보를 조회
+        Order order = orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
+        // 주문이 없을 경우 EntityNotFoundException 예외 발생
+
+        // 주문을 취소
+        orderService.cancelOrder(orderId); // 해당 주문 ID에 대해 주문 취소 처리
+
+        // 주문 상태가 "CANCEL"로 변경되었는지 확인
+        assertEquals(OrderStatus.CANCEL, order.getOrderStatus());
+
+        // 주문 취소 후 상품 재고가 100개로 복구되었는지 확인
+        assertEquals(100, item.getStockNumber());
     }
 
 }

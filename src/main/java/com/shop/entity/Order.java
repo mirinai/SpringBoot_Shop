@@ -75,4 +75,13 @@ public class Order extends BaseEntity{
         return totalPrice; // 계산된 총 가격 반환
     }
 
+    // 주문을 취소하는 메서드
+    public void cancelOrder() {
+        this.orderStatus = OrderStatus.CANCEL; // 주문 상태를 'CANCEL'로 변경
+
+        for (OrderItem orderItem : orderItems) {
+            orderItem.cancel(); // 각 주문 항목(OrderItem)의 재고를 복구하기 위해 cancel() 호출
+        }
+    }
+
 }

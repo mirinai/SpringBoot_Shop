@@ -105,7 +105,7 @@ public class ItemService {
         // 1️⃣ **상품 정보 수정**
         Item item = itemRepository.findById(itemFormDto.getId())
                 .orElseThrow(EntityNotFoundException::new); // 상품 조회, 없으면 예외 발생
-        item.updateTime(itemFormDto); // 상품 정보 업데이트
+        item.updateItem(itemFormDto); // 상품 정보 업데이트
 
         // 2️⃣ **상품 이미지 수정**
         List<Long> itemImgIds = itemFormDto.getItemImgIds(); // 이미지 ID 리스트 가져오기

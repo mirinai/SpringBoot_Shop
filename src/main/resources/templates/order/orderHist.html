@@ -7,6 +7,58 @@
   <meta name="_csrf" th:content="${_csrf.token}"/>
   <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 </head>
+<th:block layout:fragment="script">
+  <script>
+    // 📝 [주문 취소 요청을 비동기적으로 처리하는 함수]
+    // - 주문 취소 버튼 클릭 시 호출되는 함수입니다.
+    // - Ajax 요청을 통해 비동기적으로 서버에 POST 요청을 보내 주문을 취소합니다.
+    function cancelOrder(orderId) {
+      // CSRF 토큰 값과 헤더 이름을 가져옵니다.
+      // CSRF 보안 기능을 활성화했을 경우, 요청 헤더에 CSRF 토큰을 추가해야 합니다.
+      var token = $("meta[name='_csrf']").attr("content"); // CSRF 토큰 값
+      var header = $("meta[name='_csrf_header']").attr("content"); // CSRF 헤더 이름
+
+      // 주문 취소 요청을 보낼 URL 및 데이터 설정
+      var url = "/order/" + orderId + "/cancel"; // 주문 취소 API URL
+      var paramData = {
+        orderId: orderId, // 주문 ID를 JSON 데이터로 포함
+      };
+
+      // JSON 문자열로 변환 (서버로 보낼 데이터)
+      var param = JSON.stringify(paramData);
+
+      // Ajax 요청
+      $.ajax({
+        url: url, // 요청을 보낼 URL
+        type: "POST", // HTTP 메서드: POST (데이터 변경 요청)
+        contentType: "application/json", // 요청 본문의 타입을 JSON으로 설정
+        data: param, // 전송할 데이터 (JSON 문자열)
+        beforeSend: function (xhr) {
+          // 요청을 보내기 전에 헤더에 CSRF 토큰을 설정
+          xhr.setRequestHeader(header, token); // "X-CSRF-TOKEN: [token]" 형태로 헤더 추가
+        },
+        dataType: "json", // 응답 데이터를 JSON 형식으로 받을 것을 지정
+        cache: false, // 브라우저 캐시 사용 안 함
+        success: function (result, status) {
+          // 요청이 성공했을 경우 호출되는 함수
+          alert("주문이 취소되었습니다."); // 성공 메시지 출력
+          location.href = "/orders/" + [[${page}]]; // 주문 내역 페이지 새로고침
+        },
+        error: function (jqXHR, status, error) {
+          // 요청이 실패했을 경우 호출되는 함수
+          if (jqXHR.status == "401") {
+            // 401 Unauthorized 응답일 경우 (로그인되지 않은 사용자)
+            alert("로그인 뒤 이용해주세요"); // 로그인 요청 메시지 출력
+            location.href = "/members/login"; // 로그인 페이지로 이동
+          } else {
+            // 기타 오류 발생 시 서버 응답 메시지를 알림창에 출력
+            alert(jqXHR.responseText);
+          }
+        },
+      });
+    }
+  </script>
+</th:block>
 
 <!-- 사용자 CSS 추가 -->
 <th:block layout:fragment="css">

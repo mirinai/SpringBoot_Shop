@@ -1,5 +1,6 @@
 package com.shop.service;
 
+import com.shop.dto.CartDetailDto;
 import com.shop.dto.CartItemDto;
 import com.shop.entity.Cart;
 import com.shop.entity.CartItem;
@@ -13,6 +14,9 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service // Spring Service 컴포넌트로 등록하여 비즈니스 로직을 처리하는 클래스임을 명시합니다.
 @RequiredArgsConstructor // Lombok 어노테이션으로, final 필드에 대한 생성자를 자동 생성합니다.
@@ -56,4 +60,24 @@ public class CartService {
             return cartItem.getId(); // 새로 생성된 CartItem ID 반환
         }
     }
+
+    @Transactional(readOnly = true) // 읽기 전용 트랜잭션 적용: 데이터 조회 시 성능 향상을 위해 읽기 전용 모드로 설정합니다.
+    public List<CartDetailDto> getCartList(String email) {
+        List<CartDetailDto> cartDetailDtoList = new ArrayList<>(); // 장바구니 정보를 담을 DTO 리스트를 생성합니다.
+
+        Member member = memberRepository.findByEmail(email); // 이메일을 사용하여 회원 정보를 조회합니다.
+
+        Cart cart = cartRepository.findByMemberId(member.getId()); // 회원 ID를 사용하여 해당 회원의 장바구니를 조회합니다.
+
+        if (cart == null) { // 해당 회원의 장바구니가 없을 경우
+            return cartDetailDtoList; // 비어 있는 리스트를 반환하여 장바구니가 비어 있음을 알립니다.
+        }
+
+        // 장바구니 ID를 사용하여 장바구니 상세 정보를 조회하고 DTO 리스트에 담습니다.
+        cartDetailDtoList = cartItemRepository.findCartDetailDtoList(cart.getId());
+
+        return cartDetailDtoList; // 장바구니 상세 정보 리스트를 반환합니다.
+    }
+
+
 }

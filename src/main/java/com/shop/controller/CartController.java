@@ -1,5 +1,6 @@
 package com.shop.controller;
 
+import com.shop.dto.CartDetailDto;
 import com.shop.dto.CartItemDto;
 import com.shop.service.CartService;
 import jakarta.validation.Valid;
@@ -7,8 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -57,4 +60,18 @@ public class CartController {
         // 장바구니 아이템 ID를 포함하여 200 OK 응답 반환
         return new ResponseEntity<Long>(cartItemId, HttpStatus.OK);
     }
+
+    @GetMapping(value = "/cart") // HTTP GET 요청을 "/cart" 경로로 매핑합니다. 장바구니 페이지를 보여줄 때 사용합니다.
+    public String orderHist(Principal principal, Model model) {
+        // 로그인된 사용자의 이메일을 통해 장바구니에 담긴 상품 목록을 가져옵니다.
+        List<CartDetailDto> cartDetailDtoList = cartService.getCartList(principal.getName());
+
+        // 뷰에 "cartItems"라는 이름으로 장바구니 상품 리스트를 전달합니다.
+        model.addAttribute("cartItems", cartDetailDtoList);
+
+        // "cart/cartList"라는 이름의 HTML 뷰를 반환합니다.
+        // resources/templates/cart/cartList.html 경로의 뷰 파일을 렌더링합니다.
+        return "cart/cartList";
+    }
+
 }

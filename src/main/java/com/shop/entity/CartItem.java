@@ -37,4 +37,10 @@ public class CartItem extends BaseEntity { // BaseEntity를 상속받아 생성�
     public void addCount(int count) {
         this.count += count; // 기존 수량에 더해 새로운 수량을 추가합니다.
     }
+
+    // 장바구니에 담긴 상품의 수량을 변경하는 메서드입니다.
+    public void updateCount(int count) {
+        this.count = count; // 해당 장바구니 항목의 수량을 새로운 값으로 설정합니다.
+    }
+
 }

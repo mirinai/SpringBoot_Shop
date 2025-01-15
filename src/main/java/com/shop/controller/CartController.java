@@ -5,16 +5,14 @@ import com.shop.dto.CartItemDto;
 import com.shop.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -73,5 +71,30 @@ public class CartController {
         // resources/templates/cart/cartList.html 경로의 뷰 파일을 렌더링합니다.
         return "cart/cartList";
     }
+
+    // 장바구니 항목 수량을 업데이트하는 API 엔드포인트입니다.
+    @PatchMapping(value = "/cartItem/{cartItemId}") // HTTP PATCH 요청을 "/cartItem/{cartItemId}" 경로로 매핑합니다.
+    public @ResponseBody ResponseEntity<?> updateCartItem(
+            @PathVariable("cartItemId") Long cartItemId, // URL 경로에서 cartItemId를 변수로 가져옵니다.
+            int count, // 요청 본문에서 변경할 수량을 가져옵니다.
+            Principal principal // 현재 로그인된 사용자의 정보를 담은 Principal 객체입니다.
+    ) {
+        // 수량이 0 이하일 경우, 잘못된 요청을 반환합니다.
+        if (count <= 0) {
+            return new ResponseEntity<String>("최소 1개 이상 담아주세요", HttpStatus.BAD_REQUEST);
+        }
+        // 현재 로그인된 사용자가 해당 장바구니 항목을 수정할 권한이 있는지 확인합니다.
+        else if (!cartService.validateCartItem(cartItemId, principal.getName())) {
+            return new ResponseEntity<String>("수정 권한이 없습니다.", HttpStatus.FORBIDDEN); // 권한이 없으면 403 Forbidden 응답을 반환합니다.
+        }
+
+        // 수량을 업데이트하는 서비스 메서드를 호출합니다.
+        cartService.updateCartItemCount(cartItemId, count);
+
+        // 수량 업데이트가 성공하면 200 OK 응답과 함께 cartItemId를 반환합니다.
+        return new ResponseEntity<Long>(cartItemId, HttpStatus.OK);
+    }
+
+
 
 }

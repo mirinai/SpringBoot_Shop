@@ -110,4 +110,15 @@ public class CartService {
         cartItem.updateCount(count);
     }
 
+    // 장바구니 항목을 삭제하는 메서드입니다.
+    public void deleteCartItem(Long cartItemId) {
+        // cartItemId를 사용하여 장바구니 항목을 조회합니다.
+        // 장바구니 항목이 존재하지 않을 경우 EntityNotFoundException 예외를 발생시킵니다.
+        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(EntityNotFoundException::new);
+
+        // 조회된 장바구니 항목을 데이터베이스에서 삭제합니다.
+        cartItemRepository.delete(cartItem); // JPA를 사용하여 해당 CartItem 엔티티를 제거합니다.
+    }
+
+
 }

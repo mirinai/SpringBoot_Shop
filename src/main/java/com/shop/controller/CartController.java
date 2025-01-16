@@ -95,6 +95,23 @@ public class CartController {
         return new ResponseEntity<Long>(cartItemId, HttpStatus.OK);
     }
 
+    // 장바구니 항목을 삭제하는 API 엔드포인트입니다.
+    @DeleteMapping(value = "/cartItem/{cartItemId}") // HTTP DELETE 요청을 "/cartItem/{cartItemId}" 경로로 매핑합니다.
+    public @ResponseBody ResponseEntity<?> deleteCartItem(
+            @PathVariable("cartItemId") Long cartItemId, // URL 경로에서 cartItemId를 가져옵니다.
+            Principal principal // 현재 로그인된 사용자의 정보를 담은 Principal 객체입니다.
+    ) {
+        // 현재 로그인된 사용자가 해당 장바구니 항목을 삭제할 권한이 있는지 확인합니다.
+        if (!cartService.validateCartItem(cartItemId, principal.getName())) {
+            // 권한이 없으면 403 Forbidden 응답을 반환합니다.
+            return new ResponseEntity<String>("수정권한이 없습니다.", HttpStatus.FORBIDDEN);
+        }
 
+        // 권한 확인 후 해당 장바구니 항목을 삭제하는 서비스 메서드를 호출합니다.
+        cartService.deleteCartItem(cartItemId);
+
+        // 삭제가 성공하면 200 OK 응답과 함께 삭제된 cartItemId를 반환합니다.
+        return new ResponseEntity<Long>(cartItemId, HttpStatus.OK);
+    }
 
 }

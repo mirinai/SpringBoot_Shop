@@ -56,42 +56,83 @@
             getOrderTotalPrice(); // 전체 주문 금액 갱신
         }
 
-        function updateCartItemCount(cartItemId, count){
+        function updateCartItemCount(cartItemId, count) {
+            if (count <= 0) {
+                alert("최소 1개 이상 담아주세요");
+                return;
+            }
+
             // CSRF 보호를 위한 토큰 및 헤더 값 가져오기
-            var token = $("meta[name='_csrf']").attr("content"); // CSRF 토큰 값
-            var header = $("meta[name='_csrf_header']").attr("content"); // CSRF 헤더 이름
+            const token = document.querySelector("meta[name='_csrf']").getAttribute("content"); // CSRF 토큰 값
+            const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content"); // CSRF 헤더 이름
 
-           // 요청할 URL을 생성합니다. cartItemId와 count 값을 쿼리 파라미터로 전달합니다.
-            var url = "/cartItem/" + cartItemId + "?count=" + count;
+            const url = `/cartItem/${cartItemId}?count=${count}`; // API URL 설정
 
-            // Ajax 요청을 통해 서버에 PATCH 메서드를 사용하여 수량을 업데이트합니다.
-            $.ajax({
-                url : url, // 수량 업데이트 API URL
-                type : "PATCH", // HTTP PATCH 메서드를 사용하여 데이터 일부를 수정합니다.
-                beforeSend : function(xhr){
-                    /* 데이터를 전송하기 전에 CSRF 보호를 위해 헤더에 CSRF 값을 설정합니다. */
-                    xhr.setRequestHeader(header, token); // 요청 헤더에 CSRF 토큰 값을 추가합니다.
-                },
-                dataType : "json", // 서버로부터 반환받을 데이터 타입을 JSON으로 설정합니다.
-                cache : false, // 캐시를 사용하지 않도록 설정합니다.
-                success : function(result, status){
-                    // 요청이 성공하면 로그 메시지를 출력합니다.
-                    console.log("cartItem count update success");
-                },
-                error : function(jqXHR, status, error){
-                    // 요청이 실패하면 HTTP 상태 코드를 확인하여 처리합니다.
-
-                    if(jqXHR.status == '401'){ // 401 상태: 인증되지 않은 사용자
-                        alert('로그인 뒤에 이용해주세요'); // 로그인 필요 메시지 출력
-                        location.href = '/member/login'; // 로그인 페이지로 리디렉션합니다.
-                    }
-                    else{
-                        // 그 외의 에러일 경우 서버에서 반환된 응답 메시지를 출력합니다.
-                        alert(jqXHR.responseText); 
+            // fetch() API 호출
+            fetch(url, {
+                method: "PATCH", // HTTP PATCH 메서드 사용
+                headers: {
+                    [header]: token, // CSRF 헤더 설정
+                    "Content-Type": "application/json" // 요청 본문 타입 설정
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        alert("로그인 후 이용해주세요");
+                        window.location.href = "/member/login"; // 로그인 페이지로 리디렉션
+                    } else {
+                        return response.text().then(text => { throw new Error(text); }); // 에러 메시지를 가져와 예외 발생
                     }
                 }
+                return response.json(); // 응답을 JSON으로 변환
+            })
+            .then(result => {
+                console.log("cartItem count update success", result); // 성공 시 콘솔 출력
+            })
+            .catch(error => {
+                alert(error.message); // 에러 메시지를 alert로 표시
             });
         }
+        
+        const deleteCartItem = (obj) =>{
+            const cartItemId = obj.dataset.id; // data-id 속성 값으로 cartItemId 가져오기
+            const token = document.querySelector("meta[name='_csrf']").getAttribute("content"); // CSRF 토큰 값
+            const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content"); // CSRF 헤더 이름
+
+            const url = "/cartItem/" + cartItemId; // 삭제 API URL
+
+            fetch(url, {
+                method: "DELETE", // HTTP DELETE 메서드
+                headers: {
+                    [header]: token, // CSRF 보호를 위한 헤더 설정
+                    "Content-Type": "application/json" // 요청 본문 타입 설정
+                }
+            })
+            .then(response =>{
+                if(!response.ok){ // 응답 코드가 200번대가 아닌 경우
+                    if(response.status === 401){ // 인증되지 않은 경우
+                        alert("로그인 후 이용해주세요");
+                        window.location.href = "/members/login"; // 로그인 페이지로 리디렉션
+                    }
+                    else{
+                         // 다른 에러일 경우 에러 메시지 반환
+                        return response.text().then(text => {throw new Error(text);});
+                    }
+                }
+                return response.json(); // JSON 응답 반환
+            })
+            .then(result => {
+                alert("장바구니 항목이 삭제되었습니다"); // 성공 시 메시지
+                window.location.href = "/cart"; // 장바구니 페이지 새로고침
+            })
+            .catch(error =>{
+                console.error("Erorr:",error);
+                alert(error.message);
+            });
+
+        };
+        
 
     </script>
 </th:block>

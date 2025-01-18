@@ -120,4 +120,31 @@ public class OrderService {
         // 주문 취소 메서드 호출 (Order 엔티티의 상태를 'CANCEL'로 변경하고 주문 항목의 재고 복구)
         order.cancelOrder();
     }
+
+    public Long orders(List<OrderDto> orderDtoList, String email){
+
+        // 이메일을 통해 회원 정보를 조회
+        Member member = memberRepository.findByEmail(email);
+        // 주문 항목 리스트를 저장할 객체 생성
+        List<OrderItem> orderItemList = new ArrayList<>();
+
+        // 전달된 주문 DTO 리스트를 반복하며 주문 항목 생성
+        for(OrderDto orderDto : orderDtoList){
+            // 상품 ID로 상품 엔티티를 조회. 없을 경우 예외 발생
+            Item item = itemRepository.findById(orderDto.getItemId()).orElseThrow(EntityNotFoundException::new);
+
+            // 주문 항목 객체 생성 (상품 정보와 수량 포함)
+            OrderItem orderItem = OrderItem.createOrderItem(item,orderDto.getCount());
+            // 생성된 주문 항목을 리스트에 추가
+            orderItemList.add(orderItem);
+        }
+
+        // 회원 정보와 주문 항목 리스트를 사용하여 주문 객체 생성
+        Order order = Order.createOrder(member,orderItemList);
+        // 생성된 주문 객체를 데이터베이스에 저장
+        orderRepository.save(order);
+
+        // 저장된 주문 객체의 ID를 반환
+        return order.getId();
+    }
 }

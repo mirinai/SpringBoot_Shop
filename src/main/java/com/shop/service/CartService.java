@@ -2,6 +2,8 @@ package com.shop.service;
 
 import com.shop.dto.CartDetailDto;
 import com.shop.dto.CartItemDto;
+import com.shop.dto.CartOrderDto;
+import com.shop.dto.OrderDto;
 import com.shop.entity.Cart;
 import com.shop.entity.CartItem;
 import com.shop.entity.Item;
@@ -28,6 +30,7 @@ public class CartService {
     private final MemberRepository memberRepository; // 회원 정보를 조회하기 위한 Repository
     private final CartRepository cartRepository; // 장바구니 정보를 관리하기 위한 Repository
     private final CartItemRepository cartItemRepository; // 장바구니 상품 정보를 관리하기 위한 Repository
+    private final OrderService orderService;
 
     // 장바구니에 상품을 추가하는 메서드
     public Long addCart(CartItemDto cartItemDto, String email) {
@@ -118,6 +121,40 @@ public class CartService {
 
         // 조회된 장바구니 항목을 데이터베이스에서 삭제합니다.
         cartItemRepository.delete(cartItem); // JPA를 사용하여 해당 CartItem 엔티티를 제거합니다.
+    }
+
+    public Long orderCartItem(List<CartOrderDto> cartOrderDtoList, String email) {
+
+        // 주문 요청 데이터를 담을 리스트 생성
+        List<OrderDto> orderDtoList = new ArrayList<>();
+
+        // 전달받은 장바구니 주문 DTO 리스트를 반복 처리
+        for (CartOrderDto cartOrderDto : cartOrderDtoList) {
+            // 장바구니 항목 ID를 통해 CartItem 엔티티를 조회. 없으면 예외 발생
+            CartItem cartItem = cartItemRepository.findById(cartOrderDto.getCartItemId())
+                    .orElseThrow(EntityNotFoundException::new);
+
+            // OrderDto 객체 생성 및 상품 ID와 수량 설정
+            OrderDto orderDto = new OrderDto();
+            orderDto.setItemId(cartItem.getItem().getId()); // 상품 ID 설정
+            orderDto.setCount(cartItem.getCount()); // 주문 수량 설정
+            orderDtoList.add(orderDto); // 주문 리스트에 추가
+        }
+
+        // OrderService의 orders 메서드를 호출하여 주문 생성 및 저장
+        Long orderId = orderService.orders(orderDtoList, email);
+
+        // 주문 처리된 장바구니 항목 삭제
+        for (CartOrderDto cartOrderDto : cartOrderDtoList) {
+            // 장바구니 항목 ID를 통해 CartItem 엔티티를 조회. 없으면 예외 발생
+            CartItem cartItem = cartItemRepository.findById(cartOrderDto.getCartItemId())
+                    .orElseThrow(EntityNotFoundException::new);
+            // 조회된 장바구니 항목 삭제
+            cartItemRepository.delete(cartItem);
+        }
+
+        // 생성된 주문 ID 반환
+        return orderId;
     }
 
 

@@ -2,6 +2,7 @@ package com.shop.controller;
 
 import com.shop.dto.CartDetailDto;
 import com.shop.dto.CartItemDto;
+import com.shop.dto.CartOrderDto;
 import com.shop.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -113,5 +114,34 @@ public class CartController {
         // 삭제가 성공하면 200 OK 응답과 함께 삭제된 cartItemId를 반환합니다.
         return new ResponseEntity<Long>(cartItemId, HttpStatus.OK);
     }
+
+    @PostMapping(value = "/cart/orders") // HTTP POST 요청을 "/cart/orders" 경로로 매핑
+    public @ResponseBody ResponseEntity<?> orderCartItem(
+            @RequestBody CartOrderDto cartOrderDto, // 요청 본문으로부터 CartOrderDto 객체 매핑
+            Principal principal // 인증된 사용자의 정보를 담은 Principal 객체
+    ) {
+        // CartOrderDto 객체에서 주문할 상품 리스트를 가져옴
+        List<CartOrderDto> cartOrderDtoList = cartOrderDto.getCartOrderDtoList();
+
+        // 주문할 상품 리스트가 비어 있거나 null인 경우 에러 응답 반환
+        if (cartOrderDtoList == null || cartOrderDtoList.size() == 0) {
+            return new ResponseEntity<String>("주문할 상품을 고르세요", HttpStatus.FORBIDDEN);
+        }
+
+        // 각 장바구니 항목에 대해 권한 검증
+        for (CartOrderDto cartOrder : cartOrderDtoList) {
+            // 현재 로그인한 사용자가 해당 장바구니 항목을 주문할 권한이 있는지 확인
+            if (!cartService.validateCartItem(cartOrder.getCartItemId(), principal.getName())) {
+                return new ResponseEntity<String>("주문권한이 없음", HttpStatus.FORBIDDEN);
+            }
+        }
+
+        // 권한 검증 완료 후, 주문 생성 로직 호출
+        Long orderId = cartService.orderCartItem(cartOrderDtoList, principal.getName());
+
+        // 주문 ID를 포함한 200 OK 응답 반환
+        return new ResponseEntity<Long>(orderId, HttpStatus.OK);
+    }
+
 
 }
